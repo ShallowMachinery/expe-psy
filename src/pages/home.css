@@ -1,0 +1,76 @@
+/* Center everything on the page */
+.home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f4f4f4;
+  }
+  
+  /* Login box */
+  .login-container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    text-align: center;
+  }
+  
+  /* Logo and title section */
+  .logo-title {
+    display: flex;
+    gap: 25px;
+
+  }
+  
+  .logo-title .logo {
+    width: 200px;
+    height: auto;
+  }
+  
+  .logo-title h1 {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    text-align: left;
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Form inputs */
+  .login-container input {
+    width: 70%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  /* Login button */
+  .login-container button {
+    width: 70%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .login-container button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 480px) {
+    .login-container {
+      width: 90%;
+      padding: 20px;
+    }
+  }
+  

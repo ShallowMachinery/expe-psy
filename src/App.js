@@ -1,24 +1,25 @@
-import logo from './logo.svg';
+import { useEffect } from "react";
 import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import ConsentForm from "./forms/consentForm";
+import Home from "./pages/Home";
+import Reports from "./pages/Reports";
 
 function App() {
+  useEffect(() => {
+    document.title = "Examining the Interaction Effect of Language and Racial Categorization on Emotion Perception";
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/reports" element={<Reports />} />
+        {/* <Route path="/fyhczhbuwq" element={<ConsentForm />} /> */}
+        <Route path="/rqyckfzpjn" element={<ConsentForm />} />
+        {/* <Route path="/mwzspvqvva" element={<ConsentForm />} /> */}
+        <Route path="/lgrpyjbylo" element={<ConsentForm />} />
+      </Routes>
+    </Router>
   );
 }
 

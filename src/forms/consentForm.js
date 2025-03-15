@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import "./consentForm.css";
-// import T1Form from "../forms/t1";
+import T1Form from "../forms/t1";
 import T2Form from "../forms/t2";
-// import T3Form from "../forms/t3";
+import T3Form from "../forms/t3";
 import T4Form from "../forms/t4";
 
 const ConsentForm = () => {
@@ -17,15 +17,15 @@ const ConsentForm = () => {
 
         // Match the path to the correct form
         switch (path) {
-            //   case "/fyhczhbuwq":
-            //     setCurrentForm(<T1Form />);
-            //     break;
+              case "/fyhczhbuwq":
+                setCurrentForm(<T1Form />);
+                break;
             case "/rqyckfzpjn":
                 setCurrentForm(<T2Form />);
                 break;
-            //   case "/mwzspvqvva":
-            //     setCurrentForm(<T3Form />);
-            //     break;
+              case "/mwzspvqvva":
+                setCurrentForm(<T3Form />);
+                break;
             case "/lgrpyjbylo":
                 setCurrentForm(<T4Form />);
                 break;

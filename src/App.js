@@ -14,9 +14,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/reports" element={<Reports />} />
-        {/* <Route path="/fyhczhbuwq" element={<ConsentForm />} /> */}
+        <Route path="/fyhczhbuwq" element={<ConsentForm />} />
         <Route path="/rqyckfzpjn" element={<ConsentForm />} />
-        {/* <Route path="/mwzspvqvva" element={<ConsentForm />} /> */}
+        <Route path="/mwzspvqvva" element={<ConsentForm />} />
         <Route path="/lgrpyjbylo" element={<ConsentForm />} />
       </Routes>
     </Router>

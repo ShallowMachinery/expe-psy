@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import './form.css';
-import { db, collection, addDoc, getDocs, query, where } from "../firebase";
+import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment } from "../firebase";
 import { Groq } from "groq-sdk";
 
 const questionData = [
@@ -201,6 +201,15 @@ const T2Form = () => {
     try {
       await addDoc(collection(db, "formResponses"), finalData);
       console.log("Form submitted successfully.");
+
+      const analyticsRef = doc(db, "analytics", "formCount");
+      const treatmentField = formData.treatmentlevel;
+      await updateDoc(analyticsRef, {
+        [treatmentField]: increment(1)
+      });
+
+      console.log(`Updated analytics: Incremented ${treatmentField} count.`);
+
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");

@@ -31,7 +31,7 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-const T4Form = () => {
+const T3Form = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
@@ -48,7 +48,7 @@ const T4Form = () => {
       questionId: q.questionId,
       response: q.questionId,
     })),
-    treatmentlevel: "T4",
+    treatmentlevel: "T3",
   });
 
   useEffect(() => {
@@ -294,4 +294,4 @@ const T4Form = () => {
   );
 };
 
-export default T4Form;
+export default T3Form;

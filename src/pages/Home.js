@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import "./home.css";
 
 const Home = () => {
@@ -20,7 +21,33 @@ const Home = () => {
 
         try {
             const auth = getAuth();
-            await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            const db = getFirestore();
+
+            const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            const user = userCredential.user;
+
+            const usersCollection = collection(db, "users");
+            const usersSnapshot = await getDocs(usersCollection);
+
+            let isAdmin = false;
+            let adminName = null;
+
+            usersSnapshot.forEach((doc) => {
+                const userData = doc.data();
+                if (userData.email === user.email) {
+                    isAdmin = true;
+                    adminName = doc.id;
+                }
+            });
+
+            if (!isAdmin) {
+                await signOut(auth);
+                setError("Access denied. Not an admin.");
+                return;
+            }
+
+            sessionStorage.setItem("adminName", adminName);
+
             navigate("/reports");
         } catch (err) {
             setError("Invalid email or password.");

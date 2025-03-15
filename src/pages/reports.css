@@ -1,9 +1,3 @@
-.reports-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-  }
-  
   .navbar {
     display: flex;
     justify-content: space-between;
@@ -11,17 +5,207 @@
     background: #007bff;
     color: white;
     padding: 15px;
-    border-radius: 8px;
   }
-  
-  .reports-list {
-    margin-top: 20px;
+
+  .navbar .welcome {
+    width: 33.3%;
   }
-  
-  .report-card {
-    border: 1px solid #ddd;
+
+  .navbar .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 33.3%;
+  }
+
+  .navbar .logout-container {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    width: 33.3%;
+  }
+
+  .navbar .logout-container .logout-btn {
+    width: 40%;
+    background-color: red;
+  }
+
+  .navbar .logout-container .logout-btn:hover {
+    background-color: rgb(255, 39, 39);
+  }
+
+  .reports-container {
+    max-width: 100%;
+    margin: auto;
     padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+  }
+
+  .reports-container .card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .card-title {
+    text-align: left;
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .forms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 16px;
   }
   
+  .forms-table th, .forms-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .forms-table th {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+  }
+  
+  .forms-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .forms-table tr:hover {
+    background-color: #ddd;
+  }
+  
+  .forms-table a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .forms-table a:hover {
+    text-decoration: underline;
+  }
+  
+
+  @media (max-width: 480px) {
+    .navbar .logout-container {
+      display: none;
+    }
+
+    .navbar .welcome {
+      font-size: medium;
+      width: 70%;
+    }
+
+    .navbar .title {
+      font-size: medium;
+      width: 30%;
+      justify-content: right;
+    }
+
+    .card-title {
+      text-align: center;
+      padding-left: 0px;
+    }
+
+    .forms-table {
+      font-size: smaller;
+    }
+  }
+  
+  /* Bottom Navbar */
+.bottom-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0px 0;
+  z-index: 1000;
+}
+
+.bottom-navbar button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #333;
+}
+
+.bottom-navbar .logout-btn-navbar {
+  color: red;
+}
+
+.bottom-navbar button:hover {
+  color: #007bff;
+}
+
+.bottom-navbar svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 3px;
+}
+
+/* Hide bottom navbar on larger screens */
+@media (min-width: 768px) {
+  .bottom-navbar {
+    display: none;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+}
+
+.modal-buttons {
+  gap: 15px;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background: gray;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.confirm-btn {
+  background: red;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+

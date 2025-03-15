@@ -2,24 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import './form.css';
 import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment } from "../firebase";
-
-const questionChoices = [
-  "Happiness", "Sadness", "Surprised", "Anger", "Fear", "Disgust"
-];
+import { Groq } from "groq-sdk";
 
 const questionData = [
-  { questionId: 1, src: "/images/foreign1.jpg", correctAnswer: "Happiness" },
-  { questionId: 2, src: "/images/foreign2.jpg", correctAnswer: "Sadness" },
-  { questionId: 3, src: "/images/foreign3.jpg", correctAnswer: "Surprised" },
-  { questionId: 4, src: "/images/foreign4.jpg", correctAnswer: "Anger" },
-  { questionId: 5, src: "/images/foreign5.jpg", correctAnswer: "Fear" },
-  { questionId: 6, src: "/images/foreign6.jpg", correctAnswer: "Disgust" },
-  { questionId: 7, src: "/images/foreign7.jpg", correctAnswer: "Happiness" },
-  { questionId: 8, src: "/images/foreign8.jpg", correctAnswer: "Sadness" },
-  { questionId: 9, src: "/images/foreign9.jpg", correctAnswer: "Surprised" },
-  { questionId: 10, src: "/images/foreign10.jpg", correctAnswer: "Anger" },
-  { questionId: 11, src: "/images/foreign11.jpg", correctAnswer: "Fear" },
-  { questionId: 12, src: "/images/foreign12.jpg", correctAnswer: "Disgust" },
+  { questionId: 1, src: "/images/foreign1.jpg", answers: ["Happiness", "Kasiyahan", "Happy", "Masaya"] },
+  { questionId: 2, src: "/images/foreign2.jpg", answers: ["Sadness", "Sad", "Kalungkutan", "Malungkot"] },
+  { questionId: 3, src: "/images/foreign3.jpg", answers: ["Surprised", "Pagkagulat", "Gulat"] },
+  { questionId: 4, src: "/images/foreign4.jpg", answers: ["Anger", "Angry", "Pagkagalit", "Galit"] },
+  { questionId: 5, src: "/images/foreign5.jpg", answers: ["Fear", "Pagkatakot", "Takot"] },
+  { questionId: 6, src: "/images/foreign6.jpg", answers: ["Disgust", "Disgusted", "Pagkasuklam"] },
+  { questionId: 7, src: "/images/foreign7.jpg", answers: ["Happiness", "Kasiyahan", "Happy", "Masaya"] },
+  { questionId: 8, src: "/images/foreign8.jpg", answers: ["Sadness", "Sad", "Kalungkutan", "Malungkot"] },
+  { questionId: 9, src: "/images/foreign9.jpg", answers: ["Surprised", "Pagkagulat", "Gulat"] },
+  { questionId: 10, src: "/images/foreign10.jpg", answers: ["Anger", "Angry", "Pagkagalit", "Galit"] },
+  { questionId: 11, src: "/images/foreign11.jpg", answers: ["Fear", "Pagkatakot", "Takot"] },
+  { questionId: 12, src: "/images/foreign12.jpg", answers: ["Disgust", "Disgusted", "Pagkasuklam"] },
 ];
 
 const shuffleArray = (array) => {
@@ -31,7 +28,7 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-const T4Form = () => {
+const T1Form = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
@@ -48,39 +45,53 @@ const T4Form = () => {
       questionId: q.questionId,
       response: q.questionId,
     })),
-    treatmentlevel: "T4",
+    treatmentlevel: "T1",
   });
 
   useEffect(() => {
     const shuffled = shuffleArray(questionData);
     setShuffledQuestions(shuffled);
-  }, []);
 
-  useEffect(() => {
-    if (shuffledQuestions.length > 0) {
-      setFormData((prevData) => ({
-        ...prevData,
-        responses: shuffledQuestions.map((q) => ({
-          questionId: q.questionId,
-          response: "",
-        })),
-      }));
-    }
-  }, [shuffledQuestions]);
-
-  useEffect(() => {
-    const shuffled = shuffleArray(questionData).map((q) => ({
-      ...q,
-      options: getChoicesForQuestion(q.correctAnswer),
+    setFormData((prevData) => ({
+      ...prevData,
+      responses: shuffled.map((q) => ({
+        questionId: q.questionId,
+        response: "",
+      })),
     }));
-    setShuffledQuestions(shuffled);
   }, []);
 
-  const getChoicesForQuestion = (correctAnswer) => {
-    let choices = shuffleArray(
-      [correctAnswer, ...questionChoices.filter(choice => choice !== correctAnswer)].slice(0, 3)
-    );
-    return shuffleArray(choices);
+  const fetchAIResponse = async (userAnswer, index) => {
+    const apiKey = process.env.REACT_APP_GROQ_API_KEY;
+    const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
+
+    const question = shuffledQuestions[index];
+    const expectedAnswers = question?.answers || [];
+
+    const correctAnswersText = expectedAnswers.join(", ");
+
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content: `You are a grading assistant evaluating a user's response based on similarity to expected answers. 
+          - Assign **1.0** if the answer is an **exact match** (not case-sensitive), a **translation** (English/Filipino, note that expected answers compared to the user's response in a different tense should be treated as the same), or very closely similar to the expected answers.
+          - Assign **0.5** based on **semantic similarity, synonyms, or contextual relevance**.  
+          - Assign **0.0** if the answer is **unrelated** or has no meaningful connection.  
+          - Return only a **single number between 0 and 1** (no explanations or text).`,
+          },
+          { role: "user", content: `User's answer: "${userAnswer}", Expected answers: "${correctAnswersText}"` },
+        ],
+      });
+      console.log(`Question ID: "${question.questionId}", User's answer: "${userAnswer}", Expected answers: "${correctAnswersText}"`);
+      console.log("Score:", parseFloat(completion.choices[0]?.message?.content));
+      return parseFloat(completion.choices[0]?.message?.content || "0");
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+      return 0;
+    }
   };
 
   const [isDisabled, setIsDisabled] = useState(false);
@@ -159,7 +170,7 @@ const T4Form = () => {
         canunderstandandread: formData.canunderstandandread,
       });
     } else if (step > 1 && step <= shuffledQuestions.length + 1) {
-      if (!formData.responses[step - 2]?.response) {
+      if (!formData.responses[step - 2]?.response.trim()) {
         alert("Please provide a response before proceeding.");
         return;
       }
@@ -172,26 +183,33 @@ const T4Form = () => {
   const handleSubmit = async () => {
     console.log("Final Data:", formData);
 
+    const structuredResponses = formData.responses.reduce((acc, { questionId, response }) => {
+      acc[questionId] = response;
+      return acc;
+    }, {});
+
+    const scores = await Promise.all(
+      formData.responses.map(({ response }, index) => fetchAIResponse(response, index))
+    );
+
     const finalData = {
       ...formData,
-      scores: formData.responses.map(({ questionId, response }) => {
-        const correctAnswer = questionData.find(q => q.questionId === questionId)?.correctAnswer || "";
-        return response.trim().toLowerCase() === correctAnswer.toLowerCase() ? 1 : 0;
-      }),
+      responses: structuredResponses,
+      scores
     };
 
     try {
       await addDoc(collection(db, "formResponses"), finalData);
       console.log("Form submitted successfully.");
 
-      const analyticsRef = doc(db, "analytics", "formCount");
-      const treatmentField = formData.treatmentlevel;
-      await updateDoc(analyticsRef, {
-        [treatmentField]: increment(1)
-      });
-
-      console.log(`Updated analytics: Incremented ${treatmentField} count.`);
-
+            const analyticsRef = doc(db, "analytics", "formCount");
+            const treatmentField = formData.treatmentlevel;
+            await updateDoc(analyticsRef, {
+              [treatmentField]: increment(1)
+            });
+      
+            console.log(`Updated analytics: Incremented ${treatmentField} count.`);
+            
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
@@ -262,20 +280,12 @@ const T4Form = () => {
           <div>
             <h2>What emotion best describes the person in the picture?</h2>
             <img src={shuffledQuestions[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
-            {shuffledQuestions[step - 2]?.options.map((option, i) => (
-              <div key={i} className="response-options">
-                <label>
-                  <input
-                    type="radio"
-                    name={`question-${step - 2}`}
-                    value={option}
-                    checked={formData.responses[step - 2]?.response === option}
-                    onChange={(e) => handleResponseChange(step - 2, e.target.value)}
-                  />
-                  {option}
-                </label>
-              </div>
-            ))}
+            <input
+              type="text"
+              placeholder="Your response"
+              value={formData.responses[step - 2]?.response || ""}
+              onChange={(e) => handleResponseChange(step - 2, e.target.value)}
+            />
             <div className="response-buttons">
               {step > 2 && <button onClick={prevStep}>Back</button>}
               <button onClick={nextStep}>{step === shuffledQuestions.length + 1 ? "Submit" : "Next"}</button>
@@ -294,4 +304,4 @@ const T4Form = () => {
   );
 };
 
-export default T4Form;
+export default T1Form;

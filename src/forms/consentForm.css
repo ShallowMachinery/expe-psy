@@ -40,7 +40,7 @@
   }
   
   label {
-    font-size: 18px !important;
+    font-size: 18px;
     display: flex;
     align-items: center;
   }
@@ -107,6 +107,34 @@
 
   .contact-person-name {
     font-weight: bold;
+  }
+
+  @media (max-width: 480px) { 
+    .consent-container {
+      max-width: 400px;
+    }
+
+    .consent-container p {
+      text-align: center;
+      font-size: medium;
+    }
+
+    .contact-persons {
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .contact-persons-left, .contact-persons-right {
+      width: 100%;
+    }
+
+    .contact-persons p, .contact-persons a {
+      font-size: medium;
+    }
+
+    .consent-container .agree-consent {
+      font-size: medium;
+    }
   }
 
   @media (max-width: 600px) {

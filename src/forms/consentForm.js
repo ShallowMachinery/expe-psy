@@ -149,7 +149,7 @@ const ConsentForm = () => {
                             </div>
 
                             <div className="checkbox-container">
-                                <label>
+                                <label className="agree-consent">
                                     <input type="checkbox" checked={agreed} onChange={handleAgreeChange} />
                                     I agree to participate in this study.
                                 </label>

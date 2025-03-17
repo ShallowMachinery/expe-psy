@@ -156,11 +156,11 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                 </tbody>
             </table>
 
-            <div className="pagination">
+            {!respondentsEmpty && <div className="pagination">
                 <button onClick={handlePrevPage} disabled={currentPage === 1}>{isMobile ? <FaChevronLeft style={{ marginBottom: "-4px" }} /> : "Previous"}</button>
                 <span>Page {currentPage} of {totalPages}</span>
                 <button onClick={handleNextPage} disabled={currentPage === totalPages}>{isMobile ? <FaChevronRight style={{ marginBottom: "-4px" }} /> : "Next"}</button>
-            </div>
+            </div>}
         </div>
     );
 };

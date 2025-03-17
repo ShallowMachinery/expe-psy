@@ -2,8 +2,29 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { FaClipboardList, FaSignOutAlt } from "react-icons/fa";
+import { FaClipboardList, FaSignOutAlt, FaUsers } from "react-icons/fa";
+import { dotSpinner } from 'ldrs';
 import "./reports.css";
+import Forms from "./reports/forms";
+import Respondents from "./reports/respondents";
+import Analytics from "./reports/analytics";
+
+dotSpinner.register();
+
+const useScreenSize = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+};
 
 const Reports = () => {
   const navigate = useNavigate();
@@ -11,6 +32,7 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [formCounts, setFormCounts] = useState({ T1: 0, T2: 0, T3: 0, T4: 0 });
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [respondents, setRespondents] = useState([]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -51,6 +73,21 @@ const Reports = () => {
           setFormCounts(analyticsSnap.data());
         }
 
+        const respondentsRef = doc(db, "analytics", "respondents");
+        const respondentsSnap = await getDoc(respondentsRef);
+
+        if (respondentsSnap.exists()) {
+          const respondentsData = respondentsSnap.data().list || {};
+          const formattedRespondents = Object.entries(respondentsData).map(([id, details]) => ({
+            id,
+            name: details.name,
+            section: details.section,
+            treatmentLevel: details.treatmentLevel,
+            status: details.status
+          }));
+          setRespondents(formattedRespondents);
+        }
+
       } catch (error) {
         console.error("Error checking admin access:", error);
         navigate("/");
@@ -75,7 +112,42 @@ const Reports = () => {
     navigate("/");
   };
 
-  if (loading) return <p>Loading...</p>;
+  const getSectionText = (section) => {
+    switch (section) {
+      case "A": return "1A";
+      case "B": return "1B";
+      case "C": return "1C";
+      case "D": return "1D";
+      case "E": return "1E";
+      default: return "N/A";
+    }
+  };
+
+  const getTreatmentText = (treatmentLevel) => {
+    switch (treatmentLevel) {
+      case "T1": return "Treatment Level 1 (Free-Labeling - Local/In-group)";
+      case "T2": return "Treatment Level 2 (Free-Labeling - Local/Out-group)";
+      case "T3": return "Treatment Level 3 (Discrete Emotion - Foreign/In-group)";
+      case "T4": return "Treatment Level 4 (Discrete Emotion - Foreign/Out-group)";
+      default: return "N/A";
+    }
+  };
+
+  if (loading) return <>
+    <nav className="navbar">
+      <h1 className="welcome"></h1>
+      <h1 className="title">Reports</h1>
+      <div className="logout-container">
+        <button className="logout-btn" disabled>
+          <FaSignOutAlt className="logout-icon" /> Logout
+        </button>
+      </div>
+    </nav>
+    <div className="loading-spinner">
+      <l-dot-spinner size="70" speed="0.7" color="black" />
+      <p>Loading...</p>
+    </div >
+  </>;
 
   return (
     <>
@@ -83,57 +155,16 @@ const Reports = () => {
         <h1 className="welcome">{user.name}</h1>
         <h1 className="title">Reports</h1>
         <div className="logout-container">
-        <button className="logout-btn" onClick={() => setShowLogoutModal(true)}>
+          <button className="logout-btn" onClick={() => setShowLogoutModal(true)}>
             <FaSignOutAlt className="logout-icon" /> Logout
           </button>
         </div>
       </nav>
 
       <div className="reports-container">
-        <div className="card" id="forms-status">
-          <h2 className="card-title">Forms</h2>
-          <table className="forms-table">
-            <thead>
-              <tr>
-                <th>Treatment Level</th>
-                <th>Treatment Description</th>
-                <th>Count</th>
-                <th>Link</th>
-                <th>Generate Report</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Treatment Level 1</td>
-                <td>Free-Labeling (Local)</td>
-                <td>{formCounts.T1 || 0}</td>
-                <td><a href="/fyhczhbuwq">Go to the form</a></td>
-                <td style={{ color: "gray" }}>Coming soon</td>
-              </tr>
-              <tr>
-                <td>Treatment Level 2</td>
-                <td>Free-Labeling (Foreign)</td>
-                <td>{formCounts.T2 || 0}</td>
-                <td><a href="/rqyckfzpjn">Go to the form</a></td>
-                <td style={{ color: "gray" }}>Coming soon</td>
-              </tr>
-              <tr>
-                <td>Treatment Level 3</td>
-                <td>Discrete Labeling (Local)</td>
-                <td>{formCounts.T3 || 0}</td>
-                <td><a href="/mwzspvqvva">Go to the form</a></td>
-                <td style={{ color: "gray" }}>Coming soon</td>
-              </tr>
-              <tr>
-                <td>Treatment Level 4</td>
-                <td>Discrete Labeling (Foreign)</td>
-                <td>{formCounts.T4 || 0}</td>
-                <td><a href="/lgrpyjbylo">Go to the form</a></td>
-                <td style={{ color: "gray" }}>Coming soon</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <Forms formCounts={formCounts} respondents={respondents} getSectionText={getSectionText} />
+        <Respondents respondents={respondents} setRespondents={setRespondents} getSectionText={getSectionText} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} />
+        <Analytics useScreenSize={useScreenSize} />
       </div>
 
       <div className="bottom-navbar">
@@ -141,12 +172,15 @@ const Reports = () => {
           <FaClipboardList />
           Forms
         </button>
+        <button onClick={() => scrollToSection("respondents-table")}>
+          <FaUsers />
+          Respondents
+        </button>
         <button className="logout-btn-navbar" onClick={() => setShowLogoutModal(true)}>
           <FaSignOutAlt />
           Logout
         </button>
       </div>
-
       {showLogoutModal && (
         <div className="modal-overlay">
           <div className="modal">
@@ -159,7 +193,6 @@ const Reports = () => {
           </div>
         </div>
       )}
-
     </>
   );
 };

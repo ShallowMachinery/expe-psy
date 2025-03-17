@@ -1,40 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import './form.css';
-import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment } from "../firebase";
-
-const questionChoices = [
-  "Happiness", "Sadness", "Surprised", "Anger", "Fear", "Disgust"
-];
+import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment, getDoc, setDoc } from "../firebase";
 
 const questionData = [
-  { questionId: 1, src: "/images/foreign1.jpg", correctAnswer: "Happiness" },
-  { questionId: 2, src: "/images/foreign2.jpg", correctAnswer: "Sadness" },
-  { questionId: 3, src: "/images/foreign3.jpg", correctAnswer: "Surprised" },
-  { questionId: 4, src: "/images/foreign4.jpg", correctAnswer: "Anger" },
-  { questionId: 5, src: "/images/foreign5.jpg", correctAnswer: "Fear" },
-  { questionId: 6, src: "/images/foreign6.jpg", correctAnswer: "Disgust" },
-  { questionId: 7, src: "/images/foreign7.jpg", correctAnswer: "Happiness" },
-  { questionId: 8, src: "/images/foreign8.jpg", correctAnswer: "Sadness" },
-  { questionId: 9, src: "/images/foreign9.jpg", correctAnswer: "Surprised" },
-  { questionId: 10, src: "/images/foreign10.jpg", correctAnswer: "Anger" },
-  { questionId: 11, src: "/images/foreign11.jpg", correctAnswer: "Fear" },
-  { questionId: 12, src: "/images/foreign12.jpg", correctAnswer: "Disgust" },
+  { questionId: 1, src: "/images/local1.jpg", correctAnswer: "Happiness" },
+  { questionId: 2, src: "/images/local2.jpg", correctAnswer: "Disgust" },
+  { questionId: 3, src: "/images/local3.jpg", correctAnswer: "Surprised" },
+  { questionId: 4, src: "/images/local4.jpg", correctAnswer: "Fear" },
+  { questionId: 5, src: "/images/local5.jpg", correctAnswer: "Anger" },
+  { questionId: 6, src: "/images/local6.jpg", correctAnswer: "Surprised" },
+  { questionId: 7, src: "/images/local7.jpg", correctAnswer: "Sadness" },
+  { questionId: 8, src: "/images/local8.jpg", correctAnswer: "Sadness" },
+  { questionId: 9, src: "/images/local9.jpg", correctAnswer: "Disgust" },
+  { questionId: 10, src: "/images/local10.jpg", correctAnswer: "Happiness" },
+  { questionId: 11, src: "/images/local11.jpg", correctAnswer: "Fear" },
+  { questionId: 12, src: "/images/local12.jpg", correctAnswer: "Anger" },
 ];
-
-const shuffleArray = (array) => {
-  let shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
 
 const T3Form = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [shuffledQuestions, setShuffledQuestions] = useState([]);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,50 +31,16 @@ const T3Form = () => {
     section: "A",
     bsustudent: false,
     canunderstandandread: false,
-    responses: shuffledQuestions.slice(1, 12).map((q) => ({
+    responses: questionData.map((q) => ({
       questionId: q.questionId,
-      response: q.questionId,
+      response: "",
     })),
     treatmentlevel: "T3",
   });
 
   useEffect(() => {
-    const shuffled = shuffleArray(questionData);
-    setShuffledQuestions(shuffled);
-  }, []);
-
-  useEffect(() => {
-    if (shuffledQuestions.length > 0) {
-      setFormData((prevData) => ({
-        ...prevData,
-        responses: shuffledQuestions.map((q) => ({
-          questionId: q.questionId,
-          response: "",
-        })),
-      }));
-    }
-  }, [shuffledQuestions]);
-
-  useEffect(() => {
-    const shuffled = shuffleArray(questionData).map((q) => ({
-      ...q,
-      options: getChoicesForQuestion(q.correctAnswer),
-    }));
-    setShuffledQuestions(shuffled);
-  }, []);
-
-  const getChoicesForQuestion = (correctAnswer) => {
-    let choices = shuffleArray(
-      [correctAnswer, ...questionChoices.filter(choice => choice !== correctAnswer)].slice(0, 3)
-    );
-    return shuffleArray(choices);
-  };
-
-  const [isDisabled, setIsDisabled] = useState(false);
-
-  useEffect(() => {
     const checkLimit = async () => {
-      const q = query(collection(db, "formResponses"), where("treatmentlevel", "==", "T2"));
+      const q = query(collection(db, "formResponses"), where("treatmentlevel", "==", "T3"));
       const querySnapshot = await getDocs(q);
 
       console.log(querySnapshot.size);
@@ -100,7 +53,7 @@ const T3Form = () => {
   }, []);
 
   useEffect(() => {
-    if (step === shuffledQuestions.length + 2) {
+    if (step === questionData.length + 2) {
       handleSubmit();
     }
   }, [step]);
@@ -116,13 +69,7 @@ const T3Form = () => {
   const handleResponseChange = (index, value) => {
     setFormData((prevData) => {
       const updatedResponses = [...prevData.responses];
-
-      if (!updatedResponses[index]) {
-        updatedResponses[index] = { questionId: shuffledQuestions[index]?.questionId || "", response: "" };
-      }
-
       updatedResponses[index].response = value;
-
       return { ...prevData, responses: updatedResponses };
     });
   };
@@ -158,7 +105,7 @@ const T3Form = () => {
         bsustudent: formData.bsustudent,
         canunderstandandread: formData.canunderstandandread,
       });
-    } else if (step > 1 && step <= shuffledQuestions.length + 1) {
+    } else if (step > 1 && step <= questionData.length + 1) {
       if (!formData.responses[step - 2]?.response) {
         alert("Please provide a response before proceeding.");
         return;
@@ -192,6 +139,33 @@ const T3Form = () => {
 
       console.log(`Updated analytics: Incremented ${treatmentField} count.`);
 
+      const respondentsRef = doc(db, "analytics", "respondents");
+      const respondentsSnap = await getDoc(respondentsRef);
+      const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
+
+      const respondentId = Object.keys(currentRespondents).find(id => 
+        currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+        currentRespondents[id].section === formData.section
+      );
+      
+      console.log(respondentId ? respondentId : "New respondent");
+
+      if (respondentId) {
+        currentRespondents[respondentId].status = "Submitted";
+        currentRespondents[respondentId].treatmentLevel = treatmentField;
+        await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
+        console.log(`Updated respondent ${formData.name} with status: Submitted and treatmentLevel: ${treatmentField}`);
+      } else {
+        const newId = `resp_${Date.now()}`;
+        const updatedRespondents = {
+          ...currentRespondents,
+          [newId]: { name: formData.name, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
+        };
+  
+        await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
+        console.log("Updated respondents list.");
+      }
+
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
@@ -209,9 +183,11 @@ const T3Form = () => {
             <div>
               <h2>Tell us about yourself first.</h2>
 
-              <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
-              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-
+              <label>Full name (SURNAME, First Name M.I.)</label>
+              <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+              <label>Email</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+              <label>Age</label>
               <select name="age" value={formData.age} onChange={handleChange} required>
                 {[...Array(8)].map((_, i) => (
                   <option key={i} value={18 + i}>
@@ -254,43 +230,99 @@ const T3Form = () => {
                 </label>
               </div>
 
-              <button onClick={nextStep}>Next</button>
+              <button className="step-1-next" onClick={nextStep}>Next</button>
             </div>
           )}
 
-        {step > 1 && step <= shuffledQuestions.length + 1 && (
+        {step > 1 && step <= questionData.length + 1 && (
           <div>
-            <h2>What emotion best describes the person in the picture?</h2>
-            <img src={shuffledQuestions[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
-            {shuffledQuestions[step - 2]?.options.map((option, i) => (
-              <div key={i} className="response-options">
-                <label>
+            <h2>What do you think this person is feeling?</h2>
+            <img src={questionData[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
+
+            <div className="choices-grid">
+              <div className="choice-row">
+                <label className="choice-option">
                   <input
                     type="radio"
                     name={`question-${step - 2}`}
-                    value={option}
-                    checked={formData.responses[step - 2]?.response === option}
+                    value="Anger"
+                    checked={formData.responses[step - 2]?.response === "Anger"}
                     onChange={(e) => handleResponseChange(step - 2, e.target.value)}
                   />
-                  {option}
+                  Anger
+                </label>
+                <label className="choice-option">
+                  <input
+                    type="radio"
+                    name={`question-${step - 2}`}
+                    value="Happiness"
+                    checked={formData.responses[step - 2]?.response === "Happiness"}
+                    onChange={(e) => handleResponseChange(step - 2, e.target.value)}
+                  />
+                  Happiness
                 </label>
               </div>
-            ))}
+              <div className="choice-row">
+                <label className="choice-option">
+                  <input
+                    type="radio"
+                    name={`question-${step - 2}`}
+                    value="Disgust"
+                    checked={formData.responses[step - 2]?.response === "Disgust"}
+                    onChange={(e) => handleResponseChange(step - 2, e.target.value)}
+                  />
+                  Disgust
+                </label>
+                <label className="choice-option">
+                  <input
+                    type="radio"
+                    name={`question-${step - 2}`}
+                    value="Sadness"
+                    checked={formData.responses[step - 2]?.response === "Sadness"}
+                    onChange={(e) => handleResponseChange(step - 2, e.target.value)}
+                  />
+                  Sadness
+                </label>
+              </div>
+              <div className="choice-row">
+                <label className="choice-option">
+                  <input
+                    type="radio"
+                    name={`question-${step - 2}`}
+                    value="Fear"
+                    checked={formData.responses[step - 2]?.response === "Fear"}
+                    onChange={(e) => handleResponseChange(step - 2, e.target.value)}
+                  />
+                  Fear
+                </label>
+                <label className="choice-option">
+                  <input
+                    type="radio"
+                    name={`question-${step - 2}`}
+                    value="Surprised"
+                    checked={formData.responses[step - 2]?.response === "Surprised"}
+                    onChange={(e) => handleResponseChange(step - 2, e.target.value)}
+                  />
+                  Surprised
+                </label>
+              </div>
+            </div>
+
             <div className="response-buttons">
               {step > 2 && <button onClick={prevStep}>Back</button>}
-              <button onClick={nextStep}>{step === shuffledQuestions.length + 1 ? "Submit" : "Next"}</button>
+              <button onClick={nextStep}>{step === questionData.length + 1 ? "Submit" : "Next"}</button>
             </div>
           </div>
         )}
 
-        {step === shuffledQuestions.length + 2 && (
+        {step === questionData.length + 2 && (
           <>
             <h2 style={{ marginBottom: "0" }}>Thank you!</h2>
             <p style={{ textAlign: "center", marginBottom: "10px" }}>Your response have been submitted.</p>
           </>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

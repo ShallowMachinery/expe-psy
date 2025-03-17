@@ -56,6 +56,10 @@
     border-radius: 10px;
   }
   
+  .step-1-next {
+    margin-top: 10px;
+  }
+  
   button {
     width: 100%;
     padding: 12px;
@@ -228,3 +232,31 @@
       height: 85vh;
     }
   }
+
+  .choices-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .choice-row {
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .choice-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 150px;
+  }
+  
+  .choice-option input {
+    accent-color: #007bff; /* Optional: Change radio button color */
+  }
+  

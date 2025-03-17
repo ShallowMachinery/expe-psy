@@ -153,7 +153,7 @@ const Analytics = ({ useScreenSize }) => {
                         >
                             {Array.from({ length: QUESTION_COUNT }, (_, i) => (
                                 <option key={i} value={i}>
-                                    {`Q${i + 1}`}
+                                    {`Question ${i + 1}`}
                                 </option>
                             ))}
                         </select>
@@ -179,14 +179,14 @@ const Analytics = ({ useScreenSize }) => {
                                 className={selectedQuestion === i ? "active" : ""}
                                 onClick={() => setSelectedQuestion(i)}
                             >
-                                {`Q${i + 1}`}
+                                {`Question ${i + 1}`}
                             </button>
                         ))}
                     </div>
                 </>}
             <div className="question-report">
                 <div className="question-info">
-                    <h3>What do you think this person is feeling?</h3>
+                    <h3><strong>What do you think this person is feeling?</strong></h3>
                     <img className="stimulus-img" src={selectedQuestionData.src} alt="Stimulus" />
                     <p style={{ textAlign: "center" }}><strong>Correct Answer:</strong> {selectedQuestionData.correctAnswer}</p>
                 </div>

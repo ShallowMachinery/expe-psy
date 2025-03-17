@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { FaClipboardList, FaSignOutAlt, FaUsers } from "react-icons/fa";
+import { FaClipboardList, FaSignOutAlt, FaUsers, FaChartPie } from "react-icons/fa";
 import { dotSpinner } from 'ldrs';
 import "./reports.css";
 import Forms from "./reports/forms";
@@ -168,13 +168,17 @@ const Reports = () => {
       </div>
 
       <div className="bottom-navbar">
-        <button onClick={() => scrollToSection("forms-table")}>
+        <button onClick={() => scrollToSection("forms-card")}>
           <FaClipboardList />
           Forms
         </button>
-        <button onClick={() => scrollToSection("respondents-table")}>
+        <button onClick={() => scrollToSection("respondents-card")}>
           <FaUsers />
           Respondents
+        </button>
+        <button onClick={() => scrollToSection("responses-card")}>
+          <FaChartPie />
+          Responses
         </button>
         <button className="logout-btn-navbar" onClick={() => setShowLogoutModal(true)}>
           <FaSignOutAlt />

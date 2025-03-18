@@ -44,7 +44,6 @@ const Analytics = ({ useScreenSize }) => {
     const [selectedTreatment, setSelectedTreatment] = useState("T1");
     const [selectedQuestion, setSelectedQuestion] = useState(0);
     const [showModal, setShowModal] = useState(false);
-    const [downloadConfirmed, setDownloadConfirmed] = useState(false);
 
     useEffect(() => {
         const fetchResponses = async () => {

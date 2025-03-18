@@ -121,9 +121,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             );
 
             const querySnapshot = await getDocs(q);
-            if (querySnapshot.empty) {
-                console.log("No matching formResponses found for update.");
-            } else {
+            if (!querySnapshot.empty) {
                 const batch = writeBatch(db);
                 querySnapshot.forEach((docSnap) => {
                     const responseRef = doc(db, "formResponses", docSnap.id);
@@ -132,9 +130,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                         section: editingRespondent.section
                     });
                 });
-    
+
                 await batch.commit();
-                console.log("Updated formResponses with new name and section.");
             }
 
             setRespondents(Object.entries(updatedRespondents).map(([id, details]) => ({
@@ -152,7 +149,6 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
     };
 
     const handleDeleteClick = (respondent) => {
-        console.log(respondent);
         setRespondentToDelete(respondent);
         setShowDeleteModal(true);
     };
@@ -175,14 +171,11 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             const updateObj = {};
             updateObj[`list.${respondentToDelete.id}`] = deleteField();
 
-            console.log("Update object for deletion:", updateObj);
-
-            await updateDoc(respondentsRef, updateObj)
-                .then(() => console.log("Field deleted successfully:", respondentToDelete.id))
-                .catch((error) => console.error("Error deleting field:", error));
+            await updateDoc(respondentsRef, updateObj).catch((error) =>
+                console.error("Error deleting field:", error)
+            );
 
             if (respondentToDelete.status === "Submitted") {
-
                 const formResponsesQuery = query(
                     formResponsesCollectionRef,
                     where("name", "==", respondentToDelete.name),
@@ -192,13 +185,10 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                 const formResponsesSnap = await getDocs(formResponsesQuery);
 
                 if (!formResponsesSnap.empty) {
-                    const deletePromises = formResponsesSnap.docs.map((doc) => 
-                        deleteDoc(doc.ref).then(() => console.log("Deleted form response:", doc.id))
+                    const deletePromises = formResponsesSnap.docs.map((doc) =>
+                        deleteDoc(doc.ref)
                     );
-    
                     await Promise.all(deletePromises);
-                } else {
-                    console.log("No matching formResponses found.");
                 }
 
                 if (respondentToDelete.treatmentLevel) {
@@ -210,11 +200,9 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                         if (formCountData[treatmentLevelField] !== undefined) {
                             const formCountUpdateObj = {};
                             formCountUpdateObj[treatmentLevelField] = increment(-1);
-                            console.log("Decreasing formCount:", formCountUpdateObj);
-
-                            await updateDoc(formCountRef, formCountUpdateObj)
-                                .then(() => console.log("Form count updated successfully for", treatmentLevelField))
-                                .catch((error) => console.error("Error updating form count:", error));
+                            await updateDoc(formCountRef, formCountUpdateObj).catch((error) =>
+                                console.error("Error updating form count:", error)
+                            );
                         } else {
                             console.warn(`Treatment level ${treatmentLevelField} not found in formCount.`);
                         }

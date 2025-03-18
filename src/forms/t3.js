@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import './form.css';
 import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment, getDoc, setDoc } from "../firebase";
 
@@ -19,7 +18,6 @@ const questionData = [
 ];
 
 const T3Form = () => {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isDisabled, setIsDisabled] = useState(false);
 

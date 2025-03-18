@@ -162,7 +162,7 @@ const Reports = () => {
       </nav>
 
       <div className="reports-container">
-        <Forms formCounts={formCounts} respondents={respondents} getSectionText={getSectionText} />
+        <Forms formCounts={formCounts} respondents={respondents} getSectionText={getSectionText} useScreenSize={useScreenSize} />
         <Respondents respondents={respondents} setRespondents={setRespondents} getSectionText={getSectionText} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} />
         <Analytics useScreenSize={useScreenSize} />
       </div>

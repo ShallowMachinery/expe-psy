@@ -1,15 +1,42 @@
 import React, { useState } from "react";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaRegHandPointRight } from "react-icons/fa";
 
-const Forms = ({ formCounts, respondents, getSectionText }) => {
-
+const Forms = ({ formCounts, respondents, getSectionText, useScreenSize }) => {
+    const isMobile = useScreenSize();
     const [expandedRows, setExpandedRows] = useState({});
+    const [copiedLink, setCopiedLink] = useState(null);
 
     const toggleExpandRow = (treatmentLevel) => {
         setExpandedRows((prev) => ({
             ...prev,
             [treatmentLevel]: !prev[treatmentLevel],
         }));
+    };
+
+    const handleCopyLink = (link) => {
+        const fullUrl = `${window.location.origin}${link}`; // Prepend domain
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullUrl)
+                .then(() => {
+                    setCopiedLink(link);
+                    setTimeout(() => setCopiedLink(null), 2000);
+                })
+                .catch((err) => console.error("Failed to copy:", err));
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = fullUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand("copy");
+                setCopiedLink(link);
+                setTimeout(() => setCopiedLink(null), 2000);
+            } catch (err) {
+                console.error("Fallback copy failed:", err);
+            }
+            document.body.removeChild(textArea);
+        }
     };
 
     const treatments = {
@@ -43,7 +70,44 @@ const Forms = ({ formCounts, respondents, getSectionText }) => {
                                 </td>
                                 <td>{description}</td>
                                 <td>{formCounts[key] || 0} / 45</td>
-                                <td><a href={formLink} target="_blank" rel="noopener noreferrer">Go to the form</a></td>
+                                <td>
+                                    <span style={{ marginTop: "0px", gap: "5px", display: "flex", justifyContent: "space-between", alignItems: "center", verticalAlign: "middle" }}>
+                                        {isMobile
+                                            ? <button
+                                                className="visit-button"
+                                                onClick={() => window.open(`${window.location.origin}${formLink}`, "_blank")}
+                                            >
+                                                <FaRegHandPointRight /> Visit
+                                            </button>
+                                            : <a
+                                                style={{ width: "100%" }}
+                                                href={`${window.location.origin}${formLink}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                Go to the form
+                                            </a>
+                                        }
+
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleCopyLink(formLink);
+                                            }}
+                                            className="copy-button"
+                                        >
+                                            {copiedLink === formLink ? (
+                                                <>
+                                                    <FaClipboardCheck color="green" /> Copied!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FaClipboard /> Copy
+                                                </>
+                                            )}
+                                        </button>
+                                    </span>
+                                </td>
                             </tr>
 
                             {expandedRows[key] && (

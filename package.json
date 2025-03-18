@@ -1,6 +1,6 @@
 {
   "name": "expe-psy",
-  "version": "0.2.0-beta",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",

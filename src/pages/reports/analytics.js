@@ -35,7 +35,7 @@ const QUESTION_DATA_FOREIGN = [
     { questionId: 12, src: "/images/foreign12.jpg", correctAnswer: "Anger" },
 ]
 
-const Analytics = ({ useScreenSize, }) => {
+const Analytics = ({ useScreenSize }) => {
     const isMobile = useScreenSize();
 
     const [respondentCounts, setRespondentCounts] = useState({});
@@ -43,6 +43,8 @@ const Analytics = ({ useScreenSize, }) => {
     const [excelResponseData, setExcelResponseData] = useState({});
     const [selectedTreatment, setSelectedTreatment] = useState("T1");
     const [selectedQuestion, setSelectedQuestion] = useState(0);
+    const [showModal, setShowModal] = useState(false);
+    const [downloadConfirmed, setDownloadConfirmed] = useState(false);
 
     useEffect(() => {
         const fetchResponses = async () => {
@@ -108,7 +110,6 @@ const Analytics = ({ useScreenSize, }) => {
                 }
             });
 
-
             setResponsesData(responseMap);
             setRespondentCounts(counts);
 
@@ -141,22 +142,22 @@ const Analytics = ({ useScreenSize, }) => {
             for (let i = 1; i <= 45; i++) {
                 let participantId = `P${String(i).padStart(2, "0")}`;
                 let row = [participantId];
-                
+
                 for (let q = 0; q < QUESTION_COUNT; q++) {
                     for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
                         const treatment = TREATMENT_LEVELS[t];
                         let score = "";
-                        
-                        if (excelResponseData[treatment] && 
-                            excelResponseData[treatment][participantId] && 
+
+                        if (excelResponseData[treatment] &&
+                            excelResponseData[treatment][participantId] &&
                             excelResponseData[treatment][participantId][q] !== undefined) {
                             score = excelResponseData[treatment][participantId][q];
                         }
-                        
+
                         row.push(score);
                     }
                 }
-                
+
                 data.push(row);
             }
 
@@ -184,9 +185,9 @@ const Analytics = ({ useScreenSize, }) => {
                     const colLetter = XLSX.utils.encode_col(col);
                     const startRow = 2;
                     const endRow = f1RowIndex - 1;
-                    
+
                     const formula = `=(2 * ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0.5))))) * ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0)))))) / (((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0.5))))) + ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0))))))`;
-                    
+
                     ws[XLSX.utils.encode_cell({ r: f1RowIndex, c: col })] = { f: formula };
                 }
             }
@@ -200,7 +201,23 @@ const Analytics = ({ useScreenSize, }) => {
         }
     };
 
+    const checkResponsesAndExport = () => {
+        const insufficientLevels = Object.entries(respondentCounts)
+            .filter(([_, count]) => count < 45)
+            .map(([level]) => level);
+    
+        if (insufficientLevels.length === 0) {
+            exportToExcel();
+        } else {
+            setShowModal(true);
+        }
+    };
 
+    const handleProceedDownload = () => {
+        setShowModal(false);
+        exportToExcel();
+    };
+    
     const chartData = responsesData[selectedTreatment]?.[selectedQuestion] || {
         exact: 0,
         similar: 0,
@@ -230,7 +247,7 @@ const Analytics = ({ useScreenSize, }) => {
         <div className="card" id="responses-card">
             <div className="card-header">
                 <h2 className="card-title">Responses</h2>
-                <button onClick={exportToExcel} style={isMobile ? { width: "100%" } : {}} className="export-button">Download Report as Excel</button>
+                <button onClick={checkResponsesAndExport} style={isMobile ? { width: "100%" } : {}} className="export-button">Export Scores</button>
             </div>
 
             {isMobile
@@ -327,6 +344,21 @@ const Analytics = ({ useScreenSize, }) => {
                     </div>
                 </div>
             </div>
+            {showModal && (
+            <div className="modal-overlay">
+                <div className="modal download">
+                    <p>The number of responses for each treatment level has not yet reached the required amount. If you choose to proceed with exporting, the F1 scores for each item in each treatment level may be inaccurate.</p>
+                    <div className="modal-buttons">
+                        <button onClick={() => setShowModal(false)} className="go-back-button">
+                            Go back
+                        </button>
+                        <button onClick={handleProceedDownload} className="download-anyway-button">
+                            Export anyway
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
         </div>
     );
 };

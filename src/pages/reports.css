@@ -67,6 +67,34 @@
   height: 100%;
 }
 
+.visit-button {
+  font-size: small;
+  gap: 6px;
+  color: #007bff;
+  background: none;
+  padding: 0;
+  width: auto;
+  margin-top: 5px;
+}
+
+.visit-button:hover {
+  background: none;
+}
+
+.copy-button {
+  font-size: small;
+  gap: 6px;
+  color: #007bff;
+  background: none;
+  padding: 0;
+  width: auto;
+  margin-top: 5px;
+}
+
+.copy-button:hover {
+  background: none;
+}
+
 .card-title {
   text-align: left;
   width: auto;
@@ -195,6 +223,10 @@
   width: 300px;
 }
 
+.modal.delete, .modal.download {
+  width: 600px;
+}
+
 .modal-buttons {
   gap: 15px;
   display: flex;
@@ -202,7 +234,20 @@
   margin-top: 20px;
 }
 
-.cancel-btn {
+.modal-buttons .delete-btn {
+  background: red;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.modal-buttons .delete-btn:hover {
+  background: rgb(202, 1, 1);
+}
+
+.modal-buttons .cancel-btn {
   background: gray;
   color: white;
   padding: 8px 15px;
@@ -211,13 +256,47 @@
   border-radius: 5px;
 }
 
-.confirm-btn {
+.modal-buttons .cancel-btn:hover {
+  background: rgb(87, 87, 87);
+}
+
+.modal-buttons .confirm-btn {
   background: red;
   color: white;
   padding: 8px 15px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.modal-buttons .confirm-btn:hover {
+  background: rgb(202, 1, 1);
+}
+
+.modal-buttons .go-back-button {
+  background: gray;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.modal-buttons .go-back-button:hover {
+  background: rgb(87, 87, 87);
+}
+
+.modal-buttons .download-anyway-button {
+  background: rgb(6, 175, 6);
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.modal-buttons .download-anyway-button:hover {
+  background: rgb(4, 105, 4);
 }
 
 .respondents-table {
@@ -253,20 +332,20 @@
   width: 100%;
 }
 
-#respondents-card .pagination {
-  margin-top: 10px;
+.table-info .pagination {
   display: flex;
+  gap: 10px;
   align-items: center;
   vertical-align: middle;
   justify-content: space-between;
 }
 
-#respondents-card .pagination button {
+.table-info .pagination button {
   padding: 15px;
   width: auto;
 }
 
-#respondents-card .pagination span {
+.table-info .pagination span {
   margin-top: 0;
 }
 
@@ -356,9 +435,82 @@
   height: 400px;
 }
 
+.filter-dropdown {
+  display: block;
+  margin-top: 5px;
+  padding: 2px;
+  font-size: 0.8rem;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.table-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding: 0 10px;
+}
+
+.filter-summary {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.actions-div {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.actions-div.not-editing {
+  margin-top: 0;
+}
+
+.actions-div.not-editing button {
+  font-size: smaller;
+}
+
+.actions-div.not-editing .edit-btn.action-btn {
+  color: #007bff;
+}
+
+.actions-div.not-editing .delete-btn.action-btn {
+  color: red;
+}
+
+.actions-div button {
+  padding: 0;
+  background: transparent;
+  width: 25px;
+}
+
+.actions-div button:hover {
+  background: transparent;
+}
+
+.actions-div .save-btn.edit-btn {
+  color: #007bff;
+}
+
+.actions-div .cancel-btn {
+  color: red;
+}
+
 @media (max-width: 480px) {
   .respondents-table {
     font-size: smaller;
+  }
+
+  .respondents-table span {
+    font-size: smaller;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .respondents-table span .actions-div.not-editing {
+    margin-top: 10px;
   }
 
   .forms-table span {
@@ -423,11 +575,11 @@
     width: 100%;
   }
 
-  #respondents-card .pagination button {
+  .table-info .pagination button {
     padding: 10px;
   }
 
-  #respondents-card .pagination span {
+  .table-info .pagination span {
     font-size: small;
   }
 
@@ -464,6 +616,10 @@
 
   .stimulus-img {
     height: 250px;
+  }
+
+  .filter-summary {
+    font-size: 0.7rem;
   }
 }
 

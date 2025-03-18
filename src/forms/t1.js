@@ -62,8 +62,6 @@ const T1Form = () => {
           { role: "user", content: `User's answer: "${userAnswer}", Expected answers: "${correctAnswersText}"` },
         ],
       });
-      console.log(`Question ID: "${question.questionId}", User's answer: "${userAnswer}", Expected answers: "${correctAnswersText}"`);
-      console.log("Score:", parseFloat(completion.choices[0]?.message?.content));
       return parseFloat(completion.choices[0]?.message?.content || "0");
     } catch (error) {
       console.error("Error fetching AI response:", error);
@@ -78,7 +76,6 @@ const T1Form = () => {
       const q = query(collection(db, "formResponses"), where("treatmentlevel", "==", "T1"));
       const querySnapshot = await getDocs(q);
 
-      console.log(querySnapshot.size);
       if (querySnapshot.size >= 45) {
         setIsDisabled(true);
       }
@@ -131,19 +128,7 @@ const T1Form = () => {
         section: prevData.firstyear ? prevData.section : "N/A",
       }));
 
-      console.log(formData);
-
-      console.log("Demographic Data Submitted:", {
-        name: formData.name,
-        email: formData.email,
-        age: formData.age,
-        firstyear: formData.firstyear,
-        section: formData.section,
-        bsustudent: formData.bsustudent,
-        canunderstandandread: formData.canunderstandandread,
-      });
     } else if (step > 1 && step <= questionData.length + 1) {
-      console.log(formData);
       if (!formData.responses[step - 2]?.response.trim()) {
         alert("Please provide a response before proceeding.");
         return;
@@ -155,7 +140,6 @@ const T1Form = () => {
   const prevStep = () => setStep(step - 1);
 
   const handleSubmit = async () => {
-    console.log("Final Data:", formData);
 
     const structuredResponses = formData.responses.reduce((acc, { questionId, response }) => {
       acc[questionId] = response;
@@ -174,7 +158,6 @@ const T1Form = () => {
 
     try {
       await addDoc(collection(db, "formResponses"), finalData);
-      console.log("Form submitted successfully.");
 
       const analyticsRef = doc(db, "analytics", "formCount");
       const treatmentField = formData.treatmentlevel;
@@ -182,7 +165,6 @@ const T1Form = () => {
         [treatmentField]: increment(1)
       });
 
-      console.log(`Updated analytics: Incremented ${treatmentField} count.`);
 
       const respondentsRef = doc(db, "analytics", "respondents");
       const respondentsSnap = await getDoc(respondentsRef);
@@ -192,14 +174,11 @@ const T1Form = () => {
         currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
         currentRespondents[id].section === formData.section
       );
-      
-      console.log(respondentId ? respondentId : "New respondent");
 
       if (respondentId) {
         currentRespondents[respondentId].status = "Submitted";
         currentRespondents[respondentId].treatmentLevel = treatmentField;
         await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
-        console.log(`Updated respondent ${formData.name} with status: Submitted and treatmentLevel: ${treatmentField}`);
       } else {
         const newId = `resp_${Date.now()}`;
         const updatedRespondents = {
@@ -208,7 +187,6 @@ const T1Form = () => {
         };
   
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
-        console.log("Updated respondents list.");
       }
 
     } catch (error) {

@@ -12,7 +12,7 @@ import Analytics from "./reports/analytics";
 dotSpinner.register();
 
 const useScreenSize = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1190);
 
   useEffect(() => {
     const handleResize = () => {

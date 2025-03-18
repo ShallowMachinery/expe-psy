@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
+import * as XLSX from "xlsx";
 
 const TREATMENT_LEVELS = ["T1", "T2", "T3", "T4"];
 const QUESTION_COUNT = 12;
@@ -34,11 +35,12 @@ const QUESTION_DATA_FOREIGN = [
     { questionId: 12, src: "/images/foreign12.jpg", correctAnswer: "Anger" },
 ]
 
-const Analytics = ({ useScreenSize }) => {
+const Analytics = ({ useScreenSize, }) => {
     const isMobile = useScreenSize();
 
     const [respondentCounts, setRespondentCounts] = useState({});
     const [responsesData, setResponsesData] = useState({});
+    const [excelResponseData, setExcelResponseData] = useState({});
     const [selectedTreatment, setSelectedTreatment] = useState("T1");
     const [selectedQuestion, setSelectedQuestion] = useState(0);
 
@@ -50,6 +52,7 @@ const Analytics = ({ useScreenSize }) => {
 
             let responseMap = {};
             let counts = {};
+            let excelData = {};
 
             TREATMENT_LEVELS.forEach((level) => {
                 responseMap[level] = Array.from({ length: QUESTION_COUNT }, () => ({
@@ -60,43 +63,143 @@ const Analytics = ({ useScreenSize }) => {
                     incorrect: 0,
                 }));
                 counts[level] = 0;
+                excelData[level] = {};
             });
+
+            const participantCounters = {};
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const treatmentLevel = data.treatmentlevel;
+                if (!participantCounters[treatmentLevel]) {
+                    participantCounters[treatmentLevel] = 1;
+                }
+                const participantId = `P${String(participantCounters[treatmentLevel]++).padStart(2, "0")}`;
 
                 if (TREATMENT_LEVELS.includes(treatmentLevel) && data.scores && data.responses) {
                     counts[treatmentLevel] += 1;
+
+                    if (!excelData[treatmentLevel][participantId]) {
+                        excelData[treatmentLevel][participantId] = Array(QUESTION_COUNT).fill("");
+                    }
 
                     data.scores.forEach((score, index) => {
                         if (treatmentLevel === "T1" || treatmentLevel === "T2") {
                             if (score === 1) {
                                 responseMap[treatmentLevel][index].exact++;
+                                excelData[treatmentLevel][participantId][index] = "1";
                             } else if (score === 0.5) {
                                 responseMap[treatmentLevel][index].similar++;
+                                excelData[treatmentLevel][participantId][index] = "0.5";
                             } else {
                                 responseMap[treatmentLevel][index].unrelated++;
+                                excelData[treatmentLevel][participantId][index] = "0";
                             }
                         } else {
                             if (score === 1) {
                                 responseMap[treatmentLevel][index].correct++;
+                                excelData[treatmentLevel][participantId][index] = "1";
                             } else {
                                 responseMap[treatmentLevel][index].incorrect++;
+                                excelData[treatmentLevel][participantId][index] = "0";
                             }
                         }
                     });
                 }
             });
 
-            console.log("Response map:", responseMap);
 
             setResponsesData(responseMap);
             setRespondentCounts(counts);
+
+            setExcelResponseData(excelData);
         };
 
         fetchResponses();
     }, []);
+
+    const exportToExcel = () => {
+        try {
+            if (!responsesData || Object.keys(responsesData).length === 0) {
+                alert("No data to export.");
+                return;
+            }
+
+            let data = [];
+
+            let headerRow1 = ["Participant"];
+            let headerRow2 = [""];
+
+            for (let i = 0; i < QUESTION_COUNT; i++) {
+                headerRow1.push(`Item ${i + 1}`, "", "", "");
+                headerRow2.push("T1", "T2", "T3", "T4");
+            }
+
+            data.push(headerRow1);
+            data.push(headerRow2);
+
+            for (let i = 1; i <= 45; i++) {
+                let participantId = `P${String(i).padStart(2, "0")}`;
+                let row = [participantId];
+                
+                for (let q = 0; q < QUESTION_COUNT; q++) {
+                    for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
+                        const treatment = TREATMENT_LEVELS[t];
+                        let score = "";
+                        
+                        if (excelResponseData[treatment] && 
+                            excelResponseData[treatment][participantId] && 
+                            excelResponseData[treatment][participantId][q] !== undefined) {
+                            score = excelResponseData[treatment][participantId][q];
+                        }
+                        
+                        row.push(score);
+                    }
+                }
+                
+                data.push(row);
+            }
+
+            let f1Row = ["F1 score"];
+            for (let q = 0; q < QUESTION_COUNT; q++) {
+                for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
+                    f1Row.push({ f: "" });
+                }
+            }
+            data.push(f1Row);
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            ws['!merges'] = [];
+            ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } });
+
+            for (let i = 0; i < QUESTION_COUNT; i++) {
+                ws['!merges'].push({ s: { r: 0, c: 1 + i * 4 }, e: { r: 0, c: 4 + i * 4 } });
+            }
+
+            const f1RowIndex = data.length - 1;
+            for (let q = 0; q < QUESTION_COUNT; q++) {
+                for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
+                    const col = 1 + q * 4 + t;
+                    const colLetter = XLSX.utils.encode_col(col);
+                    const startRow = 2;
+                    const endRow = f1RowIndex - 1;
+                    
+                    const formula = `=(2 * ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0.5))))) * ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0)))))) / (((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0.5))))) + ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0))))))`;
+                    
+                    ws[XLSX.utils.encode_cell({ r: f1RowIndex, c: col })] = { f: formula };
+                }
+            }
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Survey Results");
+            XLSX.writeFile(wb, "Survey_Results.xlsx");
+        } catch (error) {
+            console.error("Error exporting to Excel:", error);
+            alert("Error exporting to Excel: " + error.message);
+        }
+    };
+
 
     const chartData = responsesData[selectedTreatment]?.[selectedQuestion] || {
         exact: 0,
@@ -127,6 +230,7 @@ const Analytics = ({ useScreenSize }) => {
         <div className="card" id="responses-card">
             <div className="card-header">
                 <h2 className="card-title">Responses</h2>
+                <button onClick={exportToExcel} style={isMobile ? { width: "100%" } : {}} className="export-button">Download Report as Excel</button>
             </div>
 
             {isMobile

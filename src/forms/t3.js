@@ -43,7 +43,6 @@ const T3Form = () => {
       const q = query(collection(db, "formResponses"), where("treatmentlevel", "==", "T3"));
       const querySnapshot = await getDocs(q);
 
-      console.log(querySnapshot.size);
       if (querySnapshot.size >= 45) {
         setIsDisabled(true);
       }
@@ -94,17 +93,6 @@ const T3Form = () => {
         section: prevData.firstyear ? prevData.section : "N/A",
       }));
 
-      console.log(formData);
-
-      console.log("Demographic Data Submitted:", {
-        name: formData.name,
-        email: formData.email,
-        age: formData.age,
-        firstyear: formData.firstyear,
-        section: formData.section,
-        bsustudent: formData.bsustudent,
-        canunderstandandread: formData.canunderstandandread,
-      });
     } else if (step > 1 && step <= questionData.length + 1) {
       if (!formData.responses[step - 2]?.response) {
         alert("Please provide a response before proceeding.");
@@ -117,8 +105,6 @@ const T3Form = () => {
   const prevStep = () => setStep(step - 1);
 
   const handleSubmit = async () => {
-    console.log("Final Data:", formData);
-
     const finalData = {
       ...formData,
       scores: formData.responses.map(({ questionId, response }) => {
@@ -129,15 +115,11 @@ const T3Form = () => {
 
     try {
       await addDoc(collection(db, "formResponses"), finalData);
-      console.log("Form submitted successfully.");
-
       const analyticsRef = doc(db, "analytics", "formCount");
       const treatmentField = formData.treatmentlevel;
       await updateDoc(analyticsRef, {
         [treatmentField]: increment(1)
       });
-
-      console.log(`Updated analytics: Incremented ${treatmentField} count.`);
 
       const respondentsRef = doc(db, "analytics", "respondents");
       const respondentsSnap = await getDoc(respondentsRef);
@@ -147,14 +129,11 @@ const T3Form = () => {
         currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
         currentRespondents[id].section === formData.section
       );
-      
-      console.log(respondentId ? respondentId : "New respondent");
 
       if (respondentId) {
         currentRespondents[respondentId].status = "Submitted";
         currentRespondents[respondentId].treatmentLevel = treatmentField;
         await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
-        console.log(`Updated respondent ${formData.name} with status: Submitted and treatmentLevel: ${treatmentField}`);
       } else {
         const newId = `resp_${Date.now()}`;
         const updatedRespondents = {
@@ -163,7 +142,6 @@ const T3Form = () => {
         };
   
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
-        console.log("Updated respondents list.");
       }
 
     } catch (error) {

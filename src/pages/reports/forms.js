@@ -7,10 +7,10 @@ const Forms = ({ formCounts, respondents, getSectionText }) => {
 
     const toggleExpandRow = (treatmentLevel) => {
         setExpandedRows((prev) => ({
-          ...prev,
-          [treatmentLevel]: !prev[treatmentLevel],
+            ...prev,
+            [treatmentLevel]: !prev[treatmentLevel],
         }));
-      };
+    };
 
     const treatments = {
         T1: { label: "Treatment Level 1", description: "Free-Labeling (Local/In-group)", formLink: "/fyhczhbuwq" },
@@ -43,7 +43,7 @@ const Forms = ({ formCounts, respondents, getSectionText }) => {
                                 </td>
                                 <td>{description}</td>
                                 <td>{formCounts[key] || 0} / 45</td>
-                                <td><a href={formLink}>Go to the form</a></td>
+                                <td><a href={formLink} target="_blank" rel="noopener noreferrer">Go to the form</a></td>
                             </tr>
 
                             {expandedRows[key] && (

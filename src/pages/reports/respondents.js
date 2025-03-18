@@ -106,7 +106,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                         <p><strong>Submitted:</strong> {statusCounts["Submitted"] || 0}</p>
                     </div>
                 </div>
-                <button className="add-respondents-btn" onClick={handleAddRespondent} disabled={!addRespondentButtonEnabled}>
+                <button className="add-respondents-btn" style={isMobile ? { width: "100%" } : {}} onClick={handleAddRespondent} disabled={!addRespondentButtonEnabled}>
                     Add Respondent
                 </button>
             </div>
@@ -126,7 +126,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                             <td style={{ textAlign: "center" }} colSpan={4}><i>No respondents yet.</i></td>
                         </tr>
                     ) : (
-                        respondents.map((resp, index) => (
+                        paginatedRespondents.map((resp, index) => (
                             <tr key={resp.id || index}>
                                 <td>{resp.name}</td>
                                 <td>{getSectionText(resp.section)}</td>

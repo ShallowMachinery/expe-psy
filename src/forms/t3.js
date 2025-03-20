@@ -20,6 +20,7 @@ const questionData = [
 const T3Form = () => {
   const [step, setStep] = useState(1);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(600);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -41,7 +42,7 @@ const T3Form = () => {
       const q = query(collection(db, "formResponses"), where("treatmentlevel", "==", "T3"));
       const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.size >= 45) {
+      if (querySnapshot.size >= 32) {
         setIsDisabled(true);
       }
     };
@@ -102,6 +103,51 @@ const T3Form = () => {
 
   const prevStep = () => setStep(step - 1);
 
+  useEffect(() => {
+    if (step >= 2) {
+      const timer = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            markIncompleteSubmission();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [step]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  const markIncompleteSubmission = async () => {
+    try {
+      const respondentsRef = doc(db, "analytics", "respondents");
+      const respondentsSnap = await getDoc(respondentsRef);
+      const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
+
+      const respondentId = Object.keys(currentRespondents).find(id =>
+        currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+        currentRespondents[id].section === formData.section
+      );
+
+      if (respondentId) {
+        currentRespondents[respondentId].status = "Incomplete submission";
+        await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
+      }
+
+      window.location.href = "/time-up";
+    } catch (error) {
+      console.error("Error marking incomplete submission:", error);
+    }
+  };
+
   const handleSubmit = async () => {
     const finalData = {
       ...formData,
@@ -123,7 +169,7 @@ const T3Form = () => {
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
-      const respondentId = Object.keys(currentRespondents).find(id => 
+      const respondentId = Object.keys(currentRespondents).find(id =>
         currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
         currentRespondents[id].section === formData.section
       );
@@ -138,7 +184,7 @@ const T3Form = () => {
           ...currentRespondents,
           [newId]: { name: formData.name, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
         };
-  
+
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
       }
 
@@ -157,7 +203,7 @@ const T3Form = () => {
           :
           step === 1 && (
             <div>
-              <h2>Tell us about yourself first.</h2>
+              <h2>Tell us about yourself first</h2>
 
               <label>Full name (SURNAME, First Name M.I.)</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} required />
@@ -175,14 +221,14 @@ const T3Form = () => {
               <div>
                 <label>
                   <input type="checkbox" name="bsustudent" checked={formData.bsustudent} onChange={handleChange} required />
-                  I am a bona fide BSU student
+                  I am a bona fide student of Bulacan State University
                 </label>
               </div>
 
               <div>
                 <label>
                   <input type="checkbox" name="firstyear" checked={formData.firstyear} onChange={handleChange} required />
-                  I am a first-year student
+                  I am a first-year Psychology student
                 </label>
               </div>
 
@@ -192,7 +238,6 @@ const T3Form = () => {
                   <select name="section" value={formData.section} onChange={handleChange} required>
                     <option value="A">A</option>
                     <option value="B">B</option>
-                    <option value="C">C</option>
                     <option value="D">D</option>
                     <option value="E">E</option>
                   </select>
@@ -202,13 +247,21 @@ const T3Form = () => {
               <div>
                 <label>
                   <input type="checkbox" name="canunderstandandread" checked={formData.canunderstandandread} onChange={handleChange} required />
-                  I can understand and read English and Filipino on a basic level
+                  I can read and understand English and Filipino at a basic level
                 </label>
               </div>
 
               <button className="step-1-next" onClick={nextStep}>Next</button>
             </div>
           )}
+
+        {step >= 2 && step <= questionData.length + 1 && (
+          <div>
+            <p style={{ color: timeLeft <= 60 ? "red" : "black", textAlign: "end" }}>
+              Please complete under {formatTime(timeLeft)}
+            </p>
+          </div>
+        )}
 
         {step > 1 && step <= questionData.length + 1 && (
           <div>

@@ -2,24 +2,26 @@ import React, { useState, useEffect } from "react";
 import './form.css';
 import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment, getDoc, setDoc } from "../firebase";
 import { Groq } from "groq-sdk";
+import answerGroups from "./answerGroups";
 
 const questionData = [
-  { questionId: 1, src: "/images/local1.jpg", answers: ["Happiness", "Kasiyahan", "Happy", "Masaya"] },
-  { questionId: 2, src: "/images/local2.jpg", answers: ["Disgust", "Disgusted", "Pagkasuklam"] },
-  { questionId: 3, src: "/images/local3.jpg", answers: ["Surprised", "Pagkagulat", "Gulat"] },
-  { questionId: 4, src: "/images/local4.jpg", answers: ["Fear", "Pagkatakot", "Takot"] },
-  { questionId: 5, src: "/images/local5.jpg", answers: ["Anger", "Angry", "Pagkagalit", "Galit"] },
-  { questionId: 6, src: "/images/local6.jpg", answers: ["Surprised", "Pagkagulat", "Gulat"] },
-  { questionId: 7, src: "/images/local7.jpg", answers: ["Sadness", "Sad", "Kalungkutan", "Malungkot"] },
-  { questionId: 8, src: "/images/local8.jpg", answers: ["Sadness", "Sad", "Kalungkutan", "Malungkot"] },
-  { questionId: 9, src: "/images/local9.jpg", answers: ["Disgust", "Disgusted", "Pagkasuklam"] },
-  { questionId: 10, src: "/images/local10.jpg", answers: ["Happiness", "Kasiyahan", "Happy", "Masaya"] },
-  { questionId: 11, src: "/images/local11.jpg", answers: ["Fear", "Pagkatakot", "Takot"] },
-  { questionId: 12, src: "/images/local12.jpg", answers: ["Anger", "Angry", "Pagkagalit", "Galit"] },
+  { questionId: 1, src: "/images/local1.jpg", answerGroup: "Happiness" },
+  { questionId: 2, src: "/images/local2.jpg", answerGroup: "Disgust" },
+  { questionId: 3, src: "/images/local3.jpg", answerGroup: "Surprise" },
+  { questionId: 4, src: "/images/local4.jpg", answerGroup: "Fear" },
+  { questionId: 5, src: "/images/local5.jpg", answerGroup: "Anger" },
+  { questionId: 6, src: "/images/local6.jpg", answerGroup: "Surprise" },
+  { questionId: 7, src: "/images/local7.jpg", answerGroup: "Sadness" },
+  { questionId: 8, src: "/images/local8.jpg", answerGroup: "Sadness" },
+  { questionId: 9, src: "/images/local9.jpg", answerGroup: "Disgust" },
+  { questionId: 10, src: "/images/local10.jpg", answerGroup: "Happiness" },
+  { questionId: 11, src: "/images/local11.jpg", answerGroup: "Fear" },
+  { questionId: 12, src: "/images/local12.jpg", answerGroup: "Anger" },
 ];
 
 const T1Form = () => {
   const [step, setStep] = useState(1);
+  const [timeLeft, setTimeLeft] = useState(600);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -36,14 +38,14 @@ const T1Form = () => {
     treatmentlevel: "T1",
   });
 
-  const fetchAIResponse = async (userAnswer, index) => {
+  const fetchAIResponse = async (userAnswer, answerGroup) => {
+    if (!userAnswer || !answerGroup) return 0;
+
+    const scoreFromGroup = checkAnswerGroup(userAnswer, answerGroup);
+    if (scoreFromGroup !== null) return scoreFromGroup;
+
     const apiKey = process.env.REACT_APP_GROQ_API_KEY;
     const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
-
-    const question = questionData[index];
-    const expectedAnswers = question?.answers || [];
-
-    const correctAnswersText = expectedAnswers.join(", ");
 
     try {
       const completion = await groq.chat.completions.create({
@@ -57,7 +59,7 @@ const T1Form = () => {
           - Assign **0.0** if the answer is **unrelated** or has no meaningful connection.  
           - Return only a **single number between 0 and 1** (no explanations or text).`,
           },
-          { role: "user", content: `User's answer: "${userAnswer}", Expected answers: "${correctAnswersText}"` },
+          { role: "user", content: `User's answer: "${userAnswer}", Expected answers/category: "${answerGroups}"` },
         ],
       });
       return parseFloat(completion.choices[0]?.message?.content || "0");
@@ -74,7 +76,7 @@ const T1Form = () => {
       const q = query(collection(db, "formResponses"), where("treatmentlevel", "==", "T1"));
       const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.size >= 45) {
+      if (querySnapshot.size >= 32) {
         setIsDisabled(true);
       }
     };
@@ -104,7 +106,6 @@ const T1Form = () => {
       ),
     }));
   };
-  
 
   const nextStep = () => {
     if (step === 1) {
@@ -137,15 +138,76 @@ const T1Form = () => {
 
   const prevStep = () => setStep(step - 1);
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    if (step >= 2) {
+      const timer = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            markIncompleteSubmission();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+  
+      return () => clearInterval(timer);
+    }
+  }, [step]);
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  const checkAnswerGroup = (userResponse, answerGroup) => {
+    if (!userResponse || !answerGroup || !answerGroups[answerGroup]) return 0;
+
+    const { exact, related, unrelated } = answerGroups[answerGroup];
+
+    const normalizedResponse = userResponse.toLowerCase();
+
+    if (exact.some(ans => ans.toLowerCase() === normalizedResponse)) return 1.0;
+    if (related.some(ans => ans.toLowerCase() === normalizedResponse)) return 0.5;
+    if (unrelated.some(ans => ans.toLowerCase() === normalizedResponse)) return 0;
+
+    return null;
+  };
+
+  const markIncompleteSubmission = async () => {
+    try {
+      const respondentsRef = doc(db, "analytics", "respondents");
+      const respondentsSnap = await getDoc(respondentsRef);
+      const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
+  
+      const respondentId = Object.keys(currentRespondents).find(id =>
+        currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+        currentRespondents[id].section === formData.section
+      );
+  
+      if (respondentId) {
+        currentRespondents[respondentId].status = "Incomplete submission";
+        await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
+      }
+  
+      window.location.href = "/time-up";
+    } catch (error) {
+      console.error("Error marking incomplete submission:", error);
+    }
+  };
+
+  const handleSubmit = async () => {
     const structuredResponses = formData.responses.reduce((acc, { questionId, response }) => {
       acc[questionId] = response;
       return acc;
     }, {});
 
     const scores = await Promise.all(
-      formData.responses.map(({ response }, index) => fetchAIResponse(response, index))
+      formData.responses.map(({ response }, index) => {
+        const answerGroup = questionData[index].answerGroup;
+        return fetchAIResponse(response, answerGroup);
+      })
     );
 
     const finalData = {
@@ -156,19 +218,17 @@ const T1Form = () => {
 
     try {
       await addDoc(collection(db, "formResponses"), finalData);
-
       const analyticsRef = doc(db, "analytics", "formCount");
       const treatmentField = formData.treatmentlevel;
       await updateDoc(analyticsRef, {
         [treatmentField]: increment(1)
       });
 
-
       const respondentsRef = doc(db, "analytics", "respondents");
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
-      const respondentId = Object.keys(currentRespondents).find(id => 
+      const respondentId = Object.keys(currentRespondents).find(id =>
         currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
         currentRespondents[id].section === formData.section
       );
@@ -183,7 +243,7 @@ const T1Form = () => {
           ...currentRespondents,
           [newId]: { name: formData.name, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
         };
-  
+
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
       }
 
@@ -202,7 +262,7 @@ const T1Form = () => {
           :
           step === 1 && (
             <div>
-              <h2>Tell us about yourself first.</h2>
+              <h2>Tell us about yourself first</h2>
 
               <label>Full name (SURNAME, First Name M.I.)</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} required />
@@ -220,14 +280,14 @@ const T1Form = () => {
               <div>
                 <label>
                   <input type="checkbox" name="bsustudent" checked={formData.bsustudent} onChange={handleChange} required />
-                  I am a bona fide BSU student
+                  I am a bona fide student of Bulacan State University
                 </label>
               </div>
 
               <div>
                 <label>
                   <input type="checkbox" name="firstyear" checked={formData.firstyear} onChange={handleChange} required />
-                  I am a first-year student
+                  I am a first-year Psychology student
                 </label>
               </div>
 
@@ -237,7 +297,6 @@ const T1Form = () => {
                   <select name="section" value={formData.section} onChange={handleChange} required>
                     <option value="A">A</option>
                     <option value="B">B</option>
-                    <option value="C">C</option>
                     <option value="D">D</option>
                     <option value="E">E</option>
                   </select>
@@ -247,7 +306,7 @@ const T1Form = () => {
               <div>
                 <label>
                   <input type="checkbox" name="canunderstandandread" checked={formData.canunderstandandread} onChange={handleChange} required />
-                  I can understand and read English and Filipino on a basic level
+                  I can read and understand English and Filipino at a basic level
                 </label>
               </div>
 
@@ -255,9 +314,17 @@ const T1Form = () => {
             </div>
           )}
 
+        {step >= 2 && step <= questionData.length + 1 && (
+          <div>
+            <p style={{ color: timeLeft <= 60 ? "red" : "black", textAlign: "end" }}>
+              Please complete under {formatTime(timeLeft)}
+            </p>
+          </div>
+        )}
+
         {step > 1 && step <= questionData.length + 1 && (
           <div>
-            <h2>What do you think this person is feeling?</h2>
+            <h2>{step - 1}. What do you think this person is feeling?</h2>
             <img src={questionData[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
             <input
               type="text"

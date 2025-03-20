@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,100..900;1,100..900&display=swap');
 
-  .consent-container {
+  .consent-container, .timeup-container {
     max-width: 600px;
     padding: 30px;
     background: #ffffff;
@@ -110,11 +110,11 @@
   }
 
   @media (max-width: 480px) { 
-    .consent-container {
+    .consent-container, .timeup-container {
       max-width: 400px;
     }
 
-    .consent-container p {
+    .consent-container p, .timeup-container p {
       text-align: center;
       font-size: medium;
     }

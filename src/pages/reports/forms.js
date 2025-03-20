@@ -69,7 +69,7 @@ const Forms = ({ formCounts, respondents, getSectionText, useScreenSize }) => {
                                     </span>
                                 </td>
                                 <td>{description}</td>
-                                <td>{formCounts[key] || 0} / 45</td>
+                                <td>{formCounts[key] || 0} / 32</td>
                                 <td>
                                     <span style={{ marginTop: "0px", gap: "5px", display: "flex", justifyContent: "space-between", alignItems: "center", verticalAlign: "middle" }}>
                                         {isMobile

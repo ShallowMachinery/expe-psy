@@ -349,7 +349,6 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                 <option value="all">All Sections</option>
                                 <option value="A">1A</option>
                                 <option value="B">1B</option>
-                                <option value="C">1C</option>
                                 <option value="D">1D</option>
                                 <option value="E">1E</option>
                             </select>
@@ -362,10 +361,10 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                 className="filter-dropdown"
                             >
                                 <option value="all">All Treatments</option>
-                                <option value="T1">T1</option>
-                                <option value="T2">T2</option>
-                                <option value="T3">T3</option>
-                                <option value="T4">T4</option>
+                                <option value="T1">T1 - Free-Labeling (Local/In-group)</option>
+                                <option value="T2">T2 - Free-Labeling (Foreign/Out-group)</option>
+                                <option value="T3">T3 - Discrete Emotion (Local/In-group)</option>
+                                <option value="T4">T4 - Discrete Emotion (Foreign/Out-group)</option>
                                 <option value="N/A">N/A</option>
                             </select>
                         </th>
@@ -379,6 +378,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                 <option value="all">All Statuses</option>
                                 <option value="Expected">Expected</option>
                                 <option value="Submitted">Submitted</option>
+                                <option value="Incomplete submission">Incomplete submission</option>
                             </select>
                         </th>
                     </tr>
@@ -409,7 +409,6 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                         >
                                             <option value="A">1A</option>
                                             <option value="B">1B</option>
-                                            <option value="C">1C</option>
                                             <option value="D">1D</option>
                                             <option value="E">1E</option>
                                         </select>
@@ -422,7 +421,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                     <td>{resp.status}</td>
                                 </tr>
                             ) : (
-                                <tr key={resp.id || index}>
+                                <tr key={resp.id || index} style={{ color: resp.status === "Incomplete submission" ? "red" : "inherit" }}>
                                     <td>
                                         <span style={{ display: "flex", verticalAlign: "middle", justifyContent: "space-between" }}>
                                             {resp.name}
@@ -458,7 +457,6 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                 <select name="section" value={newRespondent?.section || "A"} onChange={handleChange} required>
                                     <option value="A">1A</option>
                                     <option value="B">1B</option>
-                                    <option value="C">1C</option>
                                     <option value="D">1D</option>
                                     <option value="E">1E</option>
                                 </select>

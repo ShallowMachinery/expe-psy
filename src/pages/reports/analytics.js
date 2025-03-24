@@ -138,7 +138,7 @@ const Analytics = ({ useScreenSize }) => {
             data.push(headerRow1);
             data.push(headerRow2);
 
-            for (let i = 1; i <= 45; i++) {
+            for (let i = 1; i <= 32; i++) {
                 let participantId = `P${String(i).padStart(2, "0")}`;
                 let row = [participantId];
 

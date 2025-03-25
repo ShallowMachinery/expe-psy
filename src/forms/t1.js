@@ -21,7 +21,7 @@ const questionData = [
 
 const T1Form = () => {
   const [step, setStep] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(600);
 
   const [formData, setFormData] = useState({
     name: "",

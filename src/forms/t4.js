@@ -338,7 +338,7 @@ const T4Form = () => {
 
         {step > 1 && step <= questionData.length + 1 && (
           <div>
-            <h2>What do you think this person is feeling?</h2>
+            <h2>{step - 1}. What do you think this person is feeling?</h2>
             <img src={questionData[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
 
             <div className="choices-grid">

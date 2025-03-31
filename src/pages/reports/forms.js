@@ -48,10 +48,10 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
     };
 
     const treatments = {
-        T1: { label: "Treatment Level 1", description: "Free-Labeling (Local/In-group)", formLink: "/fyhczhbuwq" },
-        T2: { label: "Treatment Level 2", description: "Free-Labeling (Foreign/Out-group)", formLink: "/rqyckfzpjn" },
-        T3: { label: "Treatment Level 3", description: "Discrete Emotion (Local/In-group)", formLink: "/mwzspvqvva" },
-        T4: { label: "Treatment Level 4", description: "Discrete Emotion (Foreign/Out-group)", formLink: "/lgrpyjbylo" },
+        T1: { label: "Treatment Level 1", description: "Free-Labeling (Local/In-group)", formLink: "/XfN4pu0g3lSGXCbwqW4U" },
+        T2: { label: "Treatment Level 2", description: "Free-Labeling (Foreign/Out-group)", formLink: "/h9BVtFjY5EpI3s2Jj1eA" },
+        T3: { label: "Treatment Level 3", description: "Discrete Emotion (Local/In-group)", formLink: "/DNf1XbrdcE5vgxiEmv13" },
+        T4: { label: "Treatment Level 4", description: "Discrete Emotion (Foreign/Out-group)", formLink: "/lcSkgVKARcdUIRUw25j9" },
     };
 
     return (

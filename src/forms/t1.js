@@ -401,7 +401,7 @@ const T1Form = () => {
             <p style={{ color: timeLeft <= 60 ? "red" : "black", textAlign: "end" }}>
               Please complete under {formatTime(timeLeft)}
             </p>
-            <p style={{ textAlign: "center", marginTop: "5px" }}>Directions: Kindly think of an answer that best describes the emotions seen in the photo below. Please avoid typographical errors.</p>
+            <p style={{ textAlign: "center", marginTop: "5px" }}>Reminder: Please avoid typographical errors.</p>
           </div>
         )}
 

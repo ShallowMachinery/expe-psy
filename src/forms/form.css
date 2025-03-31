@@ -14,6 +14,64 @@
     padding: 15px;
   }
   
+  .splash-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    position: relative;
+  }
+  
+  .splash-screen {
+    position: relative;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .get-started-btn {
+    position: absolute;
+    top: 80%; /* Adjust this value as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 100%;
+    max-width: 300px;
+    padding: 12px;
+    background: #715937;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: background 0.3s ease;
+  }
+  
+  .get-started-btn:hover {
+    background: #5e4a2f;
+  }
+  
+  .splash-image {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  @media (max-width: 768px) {
+    .splash-image {
+      border-radius: 25px;
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 1));
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 1));
+    }
+
+    .splash-container {
+      height: 90vh;
+    }
+  }
+  
   input[type="text"],
   input[type="email"],
   input[type="number"],
@@ -63,7 +121,7 @@
   button {
     width: 100%;
     padding: 12px;
-    background: #007bff;
+    background: #715937;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -73,7 +131,7 @@
   }
   
   button:hover {
-    background: #0056b3;
+    background: #5e4a2f;
   }
   
   button:disabled {
@@ -220,7 +278,6 @@
     justify-content: center;
     align-items: center;
     height: auto;
-    background-color: #f4f4f4;
   }
 
   @media (max-width: 600px) {
@@ -253,6 +310,6 @@
   }
   
   .choice-option input {
-    accent-color: #007bff;
+    accent-color: #715937;
   }
   

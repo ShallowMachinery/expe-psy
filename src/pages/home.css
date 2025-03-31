@@ -1,4 +1,4 @@
-.home-container {
+.home-container, .timeup-parent-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,7 +6,7 @@
     background: #f4f4f4;
   }
   
-  .login-container {
+  .login-container, .timeup-overlay {
     background: white;
     padding: 30px;
     border-radius: 12px;
@@ -36,7 +36,7 @@
   }
   
   .login-container input {
-    width: 70%;
+    width: 100%;
     padding: 12px;
     margin: 8px 0;
     border: 1px solid #ddd;
@@ -45,9 +45,9 @@
   }
   
   .login-container button {
-    width: 70%;
+    width: 100%;
     padding: 12px;
-    background-color: #007bff;
+    background-color: #715937;
     color: white;
     border: none;
     border-radius: 8px;
@@ -57,7 +57,7 @@
   }
   
   .login-container button:hover {
-    background-color: #0056b3;
+    background-color: #5e4a2f;
   }
   
   @media (max-width: 480px) {

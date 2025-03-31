@@ -332,7 +332,6 @@ const T4Form = () => {
             <p style={{ color: timeLeft <= 60 ? "red" : "black", textAlign: "end" }}>
               Please complete under {formatTime(timeLeft)}
             </p>
-            <p style={{ textAlign: "center", marginTop: "5px" }}>Directions: Kindly choose the answer from the choices that best describes the emotion seen in the photo below.</p>
           </div>
         )}
 

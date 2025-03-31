@@ -1,8 +1,16 @@
 import { getFirestore, doc, getDoc, setDoc, increment, deleteField, collection, query, where, getDocs, writeBatch, updateDoc, deleteDoc } from "firebase/firestore";
 import React, { useState, useEffect, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import Courses from "../../forms/courses";
 
-const Respondents = ({ respondents, setRespondents, getSectionText, getTreatmentText, useScreenSize }) => {
+const formatCourseName = (courseCode) => {
+    const courseNames = Object.fromEntries(
+        Courses.flatMap(({ courses }) => courses.map(({ name, code }) => [code, name]))
+    );
+    return courseNames[courseCode] || courseCode;
+};
+
+const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenSize }) => {
     const isMobile = useScreenSize();
 
     const [addRespondentButtonEnabled, setAddRespondentButtonEnabled] = useState(true);
@@ -28,7 +36,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             setRespondentsEmpty(false);
         }
         setAddRespondentButtonEnabled(false);
-        setNewRespondent({ name: "", section: "A", treatmentLevel: "", status: "" });
+        setNewRespondent({ name: "", college: "", course: "", yearLevel: "", section: "", treatmentLevel: "", status: "" });
     };
 
     const handleChange = (e, forEdit = false) => {
@@ -60,7 +68,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             const newId = `resp_${Date.now()}`;
             const updatedRespondents = {
                 ...currentRespondents,
-                [newId]: { name: newRespondent.name, section: newRespondent.section, treatmentLevel: newRespondent.treatmentLevel, status: "Expected" },
+                [newId]: { name: newRespondent.name, course: newRespondent.course, yearLevel: newRespondent.yearLevel, section: newRespondent.section, treatmentLevel: newRespondent.treatmentLevel, status: "Expected" },
             };
 
             await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
@@ -68,6 +76,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             setRespondents(Object.entries(updatedRespondents).map(([id, details]) => ({
                 id,
                 name: details.name,
+                course: details.course,
+                yearLevel: details.yearLevel,
                 section: details.section,
                 treatmentLevel: details.treatmentLevel,
                 status: details.status
@@ -81,7 +91,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
     };
 
     const handleEditRespondent = (respondent) => {
-        setEditingRespondent({ ...respondent });
+        setEditingRespondent({ ...respondent, college: Courses.find(({ courses }) => courses.some(({ code }) => code === respondent.course))?.college });
     };
 
     const handleSaveEdit = async () => {
@@ -106,6 +116,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                 ...currentRespondents,
                 [editingRespondent.id]: {
                     name: editingRespondent.name,
+                    course: editingRespondent.course,
+                    yearLevel: editingRespondent.yearLevel,
                     section: editingRespondent.section,
                     treatmentLevel: editingRespondent.treatmentLevel,
                     status: editingRespondent.status
@@ -117,6 +129,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             const q = query(
                 formResponsesRef,
                 where("name", "==", oldRespondent.name),
+                where("course", "==", oldRespondent.course),
+                where("yearLevel", "==", oldRespondent.yearLevel),
                 where("section", "==", oldRespondent.section)
             );
 
@@ -127,6 +141,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                     const responseRef = doc(db, "formResponses", docSnap.id);
                     batch.update(responseRef, {
                         name: editingRespondent.name,
+                        course: editingRespondent.course,
+                        yearLevel: editingRespondent.yearLevel,
                         section: editingRespondent.section
                     });
                 });
@@ -137,6 +153,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
             setRespondents(Object.entries(updatedRespondents).map(([id, details]) => ({
                 id,
                 name: details.name,
+                course: details.course,
+                yearLevel: details.yearLevel,
                 section: details.section,
                 treatmentLevel: details.treatmentLevel,
                 status: details.status
@@ -179,6 +197,8 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                 const formResponsesQuery = query(
                     formResponsesCollectionRef,
                     where("name", "==", respondentToDelete.name),
+                    where("course", "==", respondentToDelete.course),
+                    where("yearLevel", "==", respondentToDelete.yearLevel),
                     where("section", "==", respondentToDelete.section)
                 );
 
@@ -339,24 +359,14 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                         <th onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
                             Name {renderSortIcon("name")}
                         </th>
-                        <th>
-                            Section
-                            <select
-                                value={sectionFilter}
-                                onChange={(e) => handleFilterChange("section", e.target.value)}
-                                className="filter-dropdown"
-                            >
-                                <option value="all">All Sections</option>
-                                <option value="A">1A</option>
-                                <option value="B">1B</option>
-                                <option value="D">1D</option>
-                                <option value="E">1E</option>
-                            </select>
+                        <th style={{ width: "200px" }}>
+                            Course, Year, Section
                         </th>
                         <th>
                             Treatment Level
                             <select
-                                value={treatmentFilter}
+                                value={statusFilter !== "Incomplete submission" ? treatmentFilter : "N/A"}
+                                disabled={statusFilter === "Incomplete submission"}
                                 onChange={(e) => handleFilterChange("treatment", e.target.value)}
                                 className="filter-dropdown"
                             >
@@ -402,16 +412,81 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                             onChange={(e) => handleChange(e, true)}
                                             placeholder="Enter name"
                                         />
-                                        <select
-                                            name="section"
-                                            value={editingRespondent.section || "A"}
-                                            onChange={(e) => handleChange(e, true)}
-                                        >
-                                            <option value="A">1A</option>
-                                            <option value="B">1B</option>
-                                            <option value="D">1D</option>
-                                            <option value="E">1E</option>
-                                        </select>
+                                        <div>
+                                            <label>Select college:</label>
+                                            <select name="college" value={editingRespondent.college || ""} onChange={(e) => handleChange(e, true)} required>
+                                                <option value="" disabled>Select college</option>
+                                                {Courses.map(({ college }) => (
+                                                    <option key={college} value={college}>
+                                                        {college}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {editingRespondent.college && (
+                                            <div>
+                                                <label>Select course:</label>
+                                                <select
+                                                    name="course"
+                                                    value={editingRespondent.course || ""}
+                                                    onChange={(e) => handleChange(e, true)}
+                                                    required
+                                                    disabled={!editingRespondent.college}
+                                                >
+                                                    <option value="" disabled>Select course</option>
+                                                    {Courses.find(({ college }) => college === editingRespondent.college)?.courses.map(({ name, code }) => (
+                                                        <option key={code} value={code}>
+                                                            {name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {editingRespondent.course && (
+                                            <div>
+                                                <label>Select year level:</label>
+                                                <select
+                                                    name="yearLevel"
+                                                    value={editingRespondent.yearLevel || ""}
+                                                    onChange={(e) => handleChange(e, true)}
+                                                    required
+                                                >
+                                                    <option value="" disabled>
+                                                        Select year level
+                                                    </option>
+                                                    <option value="1">1st Year</option>
+                                                    <option value="2">2nd Year</option>
+                                                    <option value="3">3rd Year</option>
+                                                    <option value="4">4th Year</option>
+                                                    <option value="5">5th Year</option>
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {editingRespondent.course && (
+                                            <div>
+                                                <label>Enter your section:</label>
+                                                <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
+                                                    <input type="text" value={editingRespondent.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
+                                                    <input
+                                                        type="text"
+                                                        name="section"
+                                                        disabled={editingRespondent.yearLevel === ""}
+                                                        value={editingRespondent.section || ""}
+                                                        onChange={(e) =>
+                                                            setEditingRespondent({
+                                                                ...editingRespondent,
+                                                                section: e.target.value.toUpperCase(),
+                                                            }, true)
+                                                        }
+                                                        maxLength={8}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                         <div className="actions-div">
                                             <button className="save-btn edit-btn" onClick={handleSaveEdit}><FaSave /></button>
                                             <button className="cancel-btn" onClick={handleCancel}><FaTimes /></button>
@@ -423,7 +498,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                             ) : (
                                 <tr key={resp.id || index} style={{ color: resp.status === "Incomplete submission" ? "red" : "inherit" }}>
                                     <td>
-                                        <span style={{ display: "flex", verticalAlign: "middle", justifyContent: "space-between" }}>
+                                        <span style={{ display: "flex", verticalAlign: "middle", justifyContent: "space-between", marginTop: "0px" }}>
                                             {resp.name}
                                             <div className="actions-div not-editing">
                                                 <button
@@ -443,7 +518,7 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                                             </div>
                                         </span>
                                     </td>
-                                    <td>{getSectionText(resp.section)}</td>
+                                    <td>{formatCourseName(resp.course)} {resp.yearLevel}{resp.section}</td>
                                     <td>{getTreatmentText(resp.treatmentLevel)}</td>
                                     <td>{resp.status}</td>
                                 </tr>
@@ -454,12 +529,77 @@ const Respondents = ({ respondents, setRespondents, getSectionText, getTreatment
                         <tr>
                             <td colSpan={4}>
                                 <input type="text" name="name" value={newRespondent?.name || ""} onChange={handleChange} placeholder="Enter name (SURNAME, First Name, M.I.)" required />
-                                <select name="section" value={newRespondent?.section || "A"} onChange={handleChange} required>
-                                    <option value="A">1A</option>
-                                    <option value="B">1B</option>
-                                    <option value="D">1D</option>
-                                    <option value="E">1E</option>
-                                </select>
+                                <div>
+                                    <select name="college" value={newRespondent.college || ""} onChange={handleChange} required>
+                                        <option value="" disabled>Select college</option>
+                                        {Courses.map(({ college }) => (
+                                            <option key={college} value={college}>
+                                                {college}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {newRespondent.college && (
+                                    <div>
+                                        <select
+                                            name="course"
+                                            value={newRespondent.course || ""}
+                                            onChange={handleChange}
+                                            required
+                                            disabled={!newRespondent.college}
+                                        >
+                                            <option value="" disabled>Select course</option>
+                                            {Courses.find(({ college }) => college === newRespondent.college)?.courses.map(({ name, code }) => (
+                                                <option key={code} value={code}>
+                                                    {name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {newRespondent.course && (
+                                    <div>
+                                        <select
+                                            name="yearLevel"
+                                            value={newRespondent.yearLevel || ""}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                Select year level
+                                            </option>
+                                            <option value="1">1st Year</option>
+                                            <option value="2">2nd Year</option>
+                                            <option value="3">3rd Year</option>
+                                            <option value="4">4th Year</option>
+                                            <option value="5">5th Year</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {newRespondent.course && (
+                                    <div>
+                                        <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
+                                            <input type="text" value={newRespondent.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
+                                            <input
+                                                type="text"
+                                                name="section"
+                                                disabled={newRespondent.yearLevel === ""}
+                                                value={newRespondent.section || ""}
+                                                onChange={(e) =>
+                                                    setNewRespondent({
+                                                        ...newRespondent,
+                                                        section: e.target.value.toUpperCase(),
+                                                    })
+                                                }
+                                                maxLength={8}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="respondents-table-add-respondents-btn-div">
                                     <button className="save-btn" onClick={handleSaveRespondent}>Save</button>
                                     <button className="cancel-btn" onClick={handleCancel}>Cancel</button>

@@ -81,6 +81,8 @@ const Reports = () => {
           const formattedRespondents = Object.entries(respondentsData).map(([id, details]) => ({
             id,
             name: details.name,
+            course: details.course,
+            yearLevel: details.yearLevel,
             section: details.section,
             treatmentLevel: details.treatmentLevel,
             status: details.status
@@ -110,17 +112,6 @@ const Reports = () => {
     const auth = getAuth();
     await signOut(auth);
     navigate("/");
-  };
-
-  const getSectionText = (section) => {
-    switch (section) {
-      case "A": return "1A";
-      case "B": return "1B";
-      case "C": return "1C";
-      case "D": return "1D";
-      case "E": return "1E";
-      default: return "N/A";
-    }
   };
 
   const getTreatmentText = (treatmentLevel) => {
@@ -162,8 +153,8 @@ const Reports = () => {
       </nav>
 
       <div className="reports-container">
-        <Forms formCounts={formCounts} respondents={respondents} getSectionText={getSectionText} useScreenSize={useScreenSize} />
-        <Respondents respondents={respondents} setRespondents={setRespondents} getSectionText={getSectionText} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} />
+        <Forms formCounts={formCounts} respondents={respondents} useScreenSize={useScreenSize} />
+        <Respondents respondents={respondents} setRespondents={setRespondents} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} />
         <Analytics useScreenSize={useScreenSize} />
       </div>
 

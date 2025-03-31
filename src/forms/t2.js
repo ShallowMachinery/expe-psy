@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import './form.css';
 import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment, getDoc, setDoc } from "../firebase";
 import { Groq } from "groq-sdk";
+import Courses from "./courses";
 import answerGroups from "./answerGroups";
+import stringSimilarity from "string-similarity";
 
 const questionData = [
   { questionId: 1, src: "/images/foreign1.jpg", answerGroup: "Happiness" },
@@ -21,15 +23,16 @@ const questionData = [
 
 const T2Form = () => {
   const [step, setStep] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(600);
+  const [timeLeft, setTimeLeft] = useState(360);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     age: "18",
-    firstyear: false,
-    section: "A",
     bsustudent: false,
+    yearLevel: "",
+    course: "",
+    section: "",
     canunderstandandread: false,
     responses: questionData.map((q) => ({
       questionId: q.questionId,
@@ -42,31 +45,32 @@ const T2Form = () => {
     if (!userAnswer || !answerGroup) return 0;
 
     const scoreFromGroup = checkAnswerGroup(userAnswer, answerGroup);
-    if (scoreFromGroup !== null) return scoreFromGroup;
+    if (scoreFromGroup === 0) {
+      const apiKey = process.env.REACT_APP_GROQ_API_KEY;
+      const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
 
-    const apiKey = process.env.REACT_APP_GROQ_API_KEY;
-    const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
-
-    try {
-      const completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          {
-            role: "system",
-            content: `You are a grading assistant evaluating a user's response based on similarity to expected answers. 
+      try {
+        const completion = await groq.chat.completions.create({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: `You are a grading assistant evaluating a user's response based on similarity to expected answers. If the user's response appears to be a **typographical error** of a term found in the expected answers, treat it as a close match and assign an appropriate score from three options: **1.0**, **0.5**, or **0.0**.
           - Assign **1.0** if the answer is an **exact match** (not case-sensitive), a **translation** (English/Filipino, note that expected answers compared to the user's response in a different tense should be treated as the same), or very closely similar to the expected answers.
           - Assign **0.5** based on **semantic similarity, synonyms, or contextual relevance**.  
           - Assign **0.0** if the answer is **unrelated** or has no meaningful connection.  
           - Return only a **single number between 0 and 1** (no explanations or text).`,
-          },
-          { role: "user", content: `User's answer: "${userAnswer}", Expected answers/category: "${answerGroups}"` },
-        ],
-      });
-      return parseFloat(completion.choices[0]?.message?.content || "0");
-    } catch (error) {
-      console.error("Error fetching AI response:", error);
-      return 0;
+            },
+            { role: "user", content: `User's answer: "${userAnswer}", Expected answers/category: "${answerGroups}"` },
+          ],
+        });
+        return parseFloat(completion.choices[0]?.message?.content || "0");
+      } catch (error) {
+        console.error("Error fetching AI response:", error);
+        return 0;
+      }
     }
+    return (scoreFromGroup !== null) ? scoreFromGroup : 0;
   };
 
   const [isDisabled, setIsDisabled] = useState(false);
@@ -116,7 +120,9 @@ const T2Form = () => {
         formData.age === "" ||
         !formData.bsustudent ||
         !formData.canunderstandandread ||
-        !formData.firstyear
+        !formData.yearLevel ||
+        !formData.course ||
+        !formData.section.trim()
       ) {
         alert("Please fill in all required fields before proceeding.");
         return;
@@ -124,8 +130,8 @@ const T2Form = () => {
 
       setFormData((prevData) => ({
         ...prevData,
-        section: prevData.firstyear ? prevData.section : "N/A",
       }));
+
     } else if (step > 1 && step <= questionData.length + 1) {
       if (!formData.responses[step - 2]?.response.trim()) {
         alert("Please provide a response before proceeding.");
@@ -164,11 +170,17 @@ const T2Form = () => {
     if (!userResponse || !answerGroup || !answerGroups[answerGroup]) return 0;
 
     const { exact, related, unrelated } = answerGroups[answerGroup];
-
     const normalizedResponse = userResponse.toLowerCase();
 
     if (exact.some(ans => ans.toLowerCase() === normalizedResponse)) return 1.0;
     if (related.some(ans => ans.toLowerCase() === normalizedResponse)) return 0.5;
+
+    const allAnswers = [...exact, ...related];
+    const bestMatch = stringSimilarity.findBestMatch(normalizedResponse, allAnswers);
+    if (bestMatch.bestMatch.rating >= 0.8) {
+      return bestMatch.bestMatch.rating >= 0.9 ? 1.0 : 0.5;
+    }
+
     if (unrelated.some(ans => ans.toLowerCase() === normalizedResponse)) return 0;
 
     return null;
@@ -229,6 +241,8 @@ const T2Form = () => {
 
       const respondentId = Object.keys(currentRespondents).find(id =>
         currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+        currentRespondents[id].course === formData.course &&
+        currentRespondents[id].yearLevel === formData.yearLevel &&
         currentRespondents[id].section === formData.section
       );
 
@@ -240,7 +254,7 @@ const T2Form = () => {
         const newId = `resp_${Date.now()}`;
         const updatedRespondents = {
           ...currentRespondents,
-          [newId]: { name: formData.name, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
+          [newId]: { name: formData.name, course: formData.course, yearLevel: formData.yearLevel, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
         };
 
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
@@ -283,23 +297,84 @@ const T2Form = () => {
                 </label>
               </div>
 
-              <div>
-                <label>
-                  <input type="checkbox" name="firstyear" checked={formData.firstyear} onChange={handleChange} required />
-                  I am a first-year Psychology student
-                </label>
-              </div>
+              {formData.bsustudent && (
+                <>
+                  <div>
+                    <label>Select your college:</label>
+                    <select name="college" value={formData.college || ""} onChange={handleChange} required>
+                      <option value="" disabled>Select college</option>
+                      {Courses.map(({ college }) => (
+                        <option key={college} value={college}>
+                          {college}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              {formData.firstyear && (
-                <div>
-                  <label>Select your section:</label>
-                  <select name="section" value={formData.section} onChange={handleChange} required>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
-                  </select>
-                </div>
+                  {formData.college && (
+                    <div>
+                      <label>Select your course:</label>
+                      <select
+                        name="course"
+                        value={formData.course || ""}
+                        onChange={handleChange}
+                        required
+                        disabled={!formData.college}
+                      >
+                        <option value="" disabled>Select course</option>
+                        {Courses.find(({ college }) => college === formData.college)?.courses.map(({ name, code }) => (
+                          <option key={code} value={code}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {formData.course && (
+                    <div>
+                      <label>Select your year level:</label>
+                      <select
+                        name="yearLevel"
+                        value={formData.yearLevel || ""}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select year level
+                        </option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                        <option value="5">5th Year</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {formData.course && (
+                    <div>
+                      <label>Enter your section:</label>
+                      <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
+                        <input type="text" value={formData.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
+                        <input
+                          type="text"
+                          name="section"
+                          disabled={formData.yearLevel === ""}
+                          value={formData.section || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              section: e.target.value.toUpperCase(),
+                            })
+                          }
+                          maxLength={8}
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               <div>
@@ -323,7 +398,7 @@ const T2Form = () => {
 
         {step > 1 && step <= questionData.length + 1 && (
           <div>
-            <h2>What do you think this person is feeling?</h2>
+            <h2>Please think of an answer that best describes the emotions seen in the photo below.</h2>
             <img src={questionData[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
             <input
               type="text"

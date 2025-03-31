@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './form.css';
 import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment, getDoc, setDoc } from "../firebase";
+import Courses from "./courses";
 
 const questionData = [
   { questionId: 1, src: "/images/local1.jpg", correctAnswer: "Happiness" },
@@ -20,15 +21,16 @@ const questionData = [
 const T3Form = () => {
   const [step, setStep] = useState(1);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600);
+  const [timeLeft, setTimeLeft] = useState(360);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     age: "18",
-    firstyear: false,
-    section: "A",
     bsustudent: false,
+    yearLevel: "",
+    course: "",
+    section: "",
     canunderstandandread: false,
     responses: questionData.map((q) => ({
       questionId: q.questionId,
@@ -81,7 +83,9 @@ const T3Form = () => {
         formData.age === "" ||
         !formData.bsustudent ||
         !formData.canunderstandandread ||
-        !formData.firstyear
+        !formData.yearLevel ||
+        !formData.course ||
+        !formData.section.trim()
       ) {
         alert("Please fill in all required fields before proceeding.");
         return;
@@ -89,7 +93,6 @@ const T3Form = () => {
 
       setFormData((prevData) => ({
         ...prevData,
-        section: prevData.firstyear ? prevData.section : "N/A",
       }));
 
     } else if (step > 1 && step <= questionData.length + 1) {
@@ -171,6 +174,8 @@ const T3Form = () => {
 
       const respondentId = Object.keys(currentRespondents).find(id =>
         currentRespondents[id].name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+        currentRespondents[id].course === formData.course &&
+        currentRespondents[id].yearLevel === formData.yearLevel &&
         currentRespondents[id].section === formData.section
       );
 
@@ -182,7 +187,7 @@ const T3Form = () => {
         const newId = `resp_${Date.now()}`;
         const updatedRespondents = {
           ...currentRespondents,
-          [newId]: { name: formData.name, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
+          [newId]: { name: formData.name, course: formData.course, yearLevel: formData.yearLevel, section: formData.section, treatmentLevel: treatmentField, status: "Submitted" },
         };
 
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
@@ -225,23 +230,84 @@ const T3Form = () => {
                 </label>
               </div>
 
-              <div>
-                <label>
-                  <input type="checkbox" name="firstyear" checked={formData.firstyear} onChange={handleChange} required />
-                  I am a first-year Psychology student
-                </label>
-              </div>
+              {formData.bsustudent && (
+                <>
+                  <div>
+                    <label>Select your college:</label>
+                    <select name="college" value={formData.college || ""} onChange={handleChange} required>
+                      <option value="" disabled>Select college</option>
+                      {Courses.map(({ college }) => (
+                        <option key={college} value={college}>
+                          {college}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              {formData.firstyear && (
-                <div>
-                  <label>Select your section:</label>
-                  <select name="section" value={formData.section} onChange={handleChange} required>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
-                  </select>
-                </div>
+                  {formData.college && (
+                    <div>
+                      <label>Select your course:</label>
+                      <select
+                        name="course"
+                        value={formData.course || ""}
+                        onChange={handleChange}
+                        required
+                        disabled={!formData.college}
+                      >
+                        <option value="" disabled>Select course</option>
+                        {Courses.find(({ college }) => college === formData.college)?.courses.map(({ name, code }) => (
+                          <option key={code} value={code}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {formData.course && (
+                    <div>
+                      <label>Select your year level:</label>
+                      <select
+                        name="yearLevel"
+                        value={formData.yearLevel || ""}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select year level
+                        </option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                        <option value="5">5th Year</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {formData.course && (
+                    <div>
+                      <label>Enter your section:</label>
+                      <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
+                        <input type="text" value={formData.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
+                        <input
+                          type="text"
+                          name="section"
+                          disabled={formData.yearLevel === ""}
+                          value={formData.section || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              section: e.target.value.toUpperCase(),
+                            })
+                          }
+                          maxLength={8}
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               <div>
@@ -265,7 +331,7 @@ const T3Form = () => {
 
         {step > 1 && step <= questionData.length + 1 && (
           <div>
-            <h2>What do you think this person is feeling?</h2>
+            <h2>Please choose the answer from the choices that best describes the emotion seen in the photo below.</h2>
             <img src={questionData[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
 
             <div className="choices-grid">

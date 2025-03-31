@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaRegHandPointRight } from "react-icons/fa";
+import Courses from "../../forms/courses";
 
-const Forms = ({ formCounts, respondents, getSectionText, useScreenSize }) => {
+const formatCourseName = (courseCode) => {
+    const courseNames = Object.fromEntries(
+      Courses.flatMap(({ courses }) => courses.map(({ name, code }) => [code, name]))
+    );
+    return courseNames[courseCode] || courseCode;
+};
+
+const Forms = ({ formCounts, respondents, useScreenSize }) => {
     const isMobile = useScreenSize();
     const [expandedRows, setExpandedRows] = useState({});
     const [copiedLink, setCopiedLink] = useState(null);
@@ -14,7 +22,7 @@ const Forms = ({ formCounts, respondents, getSectionText, useScreenSize }) => {
     };
 
     const handleCopyLink = (link) => {
-        const fullUrl = `${window.location.origin}${link}`; // Prepend domain
+        const fullUrl = `${window.location.origin}${link}`;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(fullUrl)
@@ -120,7 +128,7 @@ const Forms = ({ formCounts, respondents, getSectionText, useScreenSize }) => {
                                                     .filter(r => r.treatmentLevel === key)
                                                     .map(r => (
                                                         <li key={r.id}>
-                                                            {r.name} - {getSectionText(r.section)}
+                                                            {r.name} - {formatCourseName(r.course)} {r.yearLevel}{r.section}
                                                         </li>
                                                     ))
                                             ) : (

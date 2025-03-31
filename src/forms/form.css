@@ -227,10 +227,6 @@
     body {
       font-size: smaller;
     }
-
-    .parent-form-container {
-      height: 85vh;
-    }
   }
 
   .choices-grid {

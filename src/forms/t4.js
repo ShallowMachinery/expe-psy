@@ -151,22 +151,18 @@ const T4Form = () => {
   };
 
   const handleSubmit = async () => {
+    const treatmentField = formData.treatmentlevel;
+
     const finalData = {
       ...formData,
       scores: formData.responses.map(({ questionId, response }) => {
         const correctAnswer = questionData.find(q => q.questionId === questionId)?.correctAnswer || "";
         return response.trim().toLowerCase() === correctAnswer.toLowerCase() ? 1 : 0;
       }),
+      submittedAt: new Date().toISOString(),
     };
 
     try {
-      await addDoc(collection(db, "formResponses"), finalData);
-      const analyticsRef = doc(db, "analytics", "formCount");
-      const treatmentField = formData.treatmentlevel;
-      await updateDoc(analyticsRef, {
-        [treatmentField]: increment(1)
-      });
-
       const respondentsRef = doc(db, "analytics", "respondents");
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
@@ -179,9 +175,14 @@ const T4Form = () => {
       );
 
       if (respondentId) {
-        currentRespondents[respondentId].status = "Submitted";
-        currentRespondents[respondentId].treatmentLevel = treatmentField;
-        await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
+        if (currentRespondents[respondentId].status === "Submitted") {
+          alert("You have already submitted this form before. Your new response will not be saved.");
+          return;
+        } else {
+          currentRespondents[respondentId].status = "Submitted";
+          currentRespondents[respondentId].treatmentLevel = formData.treatmentlevel;
+          await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
+        }
       } else {
         const newId = `resp_${Date.now()}`;
         const updatedRespondents = {
@@ -191,6 +192,12 @@ const T4Form = () => {
 
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
       }
+
+      await addDoc(collection(db, "formResponses"), finalData);
+      const analyticsRef = doc(db, "analytics", "formCount");
+      await updateDoc(analyticsRef, {
+        [treatmentField]: increment(1)
+      });
 
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -325,12 +332,13 @@ const T4Form = () => {
             <p style={{ color: timeLeft <= 60 ? "red" : "black", textAlign: "end" }}>
               Please complete under {formatTime(timeLeft)}
             </p>
+            <p style={{ textAlign: "center", marginTop: "5px" }}>Directions: Kindly choose the answer from the choices that best describes the emotion seen in the photo below.</p>
           </div>
         )}
 
         {step > 1 && step <= questionData.length + 1 && (
           <div>
-            <h2>Please choose the answer from the choices that best describes the emotion seen in the photo below.</h2>
+            <h2>What do you think this person is feeling?</h2>
             <img src={questionData[step - 2]?.src} alt={`Question ${step - 1}`} width="250" />
 
             <div className="choices-grid">

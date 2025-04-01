@@ -360,7 +360,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                             Name {renderSortIcon("name")}
                         </th>
                         <th style={{ width: "200px" }}>
-                            Course, Year, Section
+                            Program, Year, Section
                         </th>
                         <th>
                             Treatment Level
@@ -426,7 +426,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
 
                                         {editingRespondent.college && (
                                             <div>
-                                                <label>Select course:</label>
                                                 <select
                                                     name="course"
                                                     value={editingRespondent.course || ""}
@@ -434,7 +433,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                                     required
                                                     disabled={!editingRespondent.college}
                                                 >
-                                                    <option value="" disabled>Select course</option>
+                                                    <option value="" disabled>Select program</option>
                                                     {Courses.find(({ college }) => college === editingRespondent.college)?.courses.map(({ name, code }) => (
                                                         <option key={code} value={code}>
                                                             {name}
@@ -446,7 +445,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
 
                                         {editingRespondent.course && (
                                             <div>
-                                                <label>Select year level:</label>
                                                 <select
                                                     name="yearLevel"
                                                     value={editingRespondent.yearLevel || ""}
@@ -467,7 +465,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
 
                                         {editingRespondent.course && (
                                             <div>
-                                                <label>Enter your section:</label>
                                                 <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
                                                     <input type="text" value={editingRespondent.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
                                                     <input
@@ -549,7 +546,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                             required
                                             disabled={!newRespondent.college}
                                         >
-                                            <option value="" disabled>Select course</option>
+                                            <option value="" disabled>Select program</option>
                                             {Courses.find(({ college }) => college === newRespondent.college)?.courses.map(({ name, code }) => (
                                                 <option key={code} value={code}>
                                                     {name}

@@ -320,7 +320,7 @@ const T2Form = () => {
 
                   {formData.college && (
                     <div>
-                      <label>Select your course:</label>
+                      <label>Select your program:</label>
                       <select
                         name="course"
                         value={formData.course || ""}
@@ -328,7 +328,7 @@ const T2Form = () => {
                         required
                         disabled={!formData.college}
                       >
-                        <option value="" disabled>Select course</option>
+                        <option value="" disabled>Select program</option>
                         {Courses.find(({ college }) => college === formData.college)?.courses.map(({ name, code }) => (
                           <option key={code} value={code}>
                             {name}

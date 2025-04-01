@@ -4,7 +4,7 @@ import Courses from "../../forms/courses";
 
 const formatCourseName = (courseCode) => {
     const courseNames = Object.fromEntries(
-      Courses.flatMap(({ courses }) => courses.map(({ name, code }) => [code, name]))
+        Courses.flatMap(({ courses }) => courses.map(({ name, code }) => [code, name]))
     );
     return courseNames[courseCode] || courseCode;
 };
@@ -13,6 +13,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
     const isMobile = useScreenSize();
     const [expandedRows, setExpandedRows] = useState({});
     const [copiedLink, setCopiedLink] = useState(null);
+    const [copiedRandomLink, setCopiedRandomLink] = useState(null);
 
     const toggleExpandRow = (treatmentLevel) => {
         setExpandedRows((prev) => ({
@@ -47,6 +48,33 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
         }
     };
 
+    const handleCopyRandomLink = () => {
+        const fullUrl = `${window.location.origin}/7q7fbmQylOjPCmnJzFO5`;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullUrl)
+                .then(() => {
+                    setCopiedRandomLink(fullUrl);
+                    setTimeout(() => setCopiedRandomLink(null), 2000);
+                })
+                .catch((err) => console.error("Failed to copy:", err));
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = fullUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand("copy");
+                setCopiedRandomLink(fullUrl);
+                setTimeout(() => setCopiedRandomLink(null), 2000);
+            } catch (err) {
+                console.error("Fallback copy failed:", err);
+            }
+            document.body.removeChild(textArea);
+        }
+    };
+
+
     const treatments = {
         T1: { label: "Treatment Level 1", description: "Free-Labeling (Local/In-group)", formLink: "/XfN4pu0g3lSGXCbwqW4U" },
         T2: { label: "Treatment Level 2", description: "Free-Labeling (Foreign/Out-group)", formLink: "/h9BVtFjY5EpI3s2Jj1eA" },
@@ -57,6 +85,16 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
     return (
         <div className="card" id="forms-card">
             <h2 className="card-title">Forms</h2>
+            <button onClick={(e) => { e.stopPropagation(); handleCopyRandomLink(); }} style={isMobile ? { width: "100%" } : {}} className="get-random-form-link-btn">
+                {copiedRandomLink ? (
+                    <>
+                        <FaClipboardCheck /> Copied!
+                    </>
+                ) : (
+                    <>
+                        <FaClipboard /> Get and copy randomized form link
+                    </>
+                )}</button>
             <table className="forms-table">
                 <thead>
                     <tr>
@@ -106,7 +144,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                         >
                                             {copiedLink === formLink ? (
                                                 <>
-                                                    <FaClipboardCheck color="green" /> Copied!
+                                                    <FaClipboardCheck /> Copied!
                                                 </>
                                             ) : (
                                                 <>

@@ -415,7 +415,6 @@ const T2Form = () => {
               onChange={(e) => handleResponseChange(step - 2, e.target.value)}
             />
             <div className="response-buttons">
-              {step > 2 && <button onClick={prevStep}>Back</button>}
               <button onClick={nextStep}>{step === questionData.length + 1 ? "Submit" : "Next"}</button>
             </div>
           </div>

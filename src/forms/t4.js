@@ -410,7 +410,6 @@ const T4Form = () => {
             </div>
 
             <div className="response-buttons">
-              {step > 2 && <button onClick={prevStep}>Back</button>}
               <button onClick={nextStep}>{step === questionData.length + 1 ? "Submit" : "Next"}</button>
             </div>
           </div>

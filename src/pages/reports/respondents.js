@@ -394,6 +394,88 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                     </tr>
                 </thead>
                 <tbody>
+                {newRespondent && (
+                        <tr>
+                            <td colSpan={4}>
+                                <input type="text" name="name" value={newRespondent?.name || ""} onChange={handleChange} placeholder="Enter name (SURNAME, First Name, M.I.)" required />
+                                <div>
+                                    <select name="college" value={newRespondent.college || ""} onChange={handleChange} required>
+                                        <option value="" disabled>Select college</option>
+                                        {Courses.map(({ college }) => (
+                                            <option key={college} value={college}>
+                                                {college}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {newRespondent.college && (
+                                    <div>
+                                        <select
+                                            name="course"
+                                            value={newRespondent.course || ""}
+                                            onChange={handleChange}
+                                            required
+                                            disabled={!newRespondent.college}
+                                        >
+                                            <option value="" disabled>Select program</option>
+                                            {Courses.find(({ college }) => college === newRespondent.college)?.courses.map(({ name, code }) => (
+                                                <option key={code} value={code}>
+                                                    {name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {newRespondent.course && (
+                                    <div>
+                                        <select
+                                            name="yearLevel"
+                                            value={newRespondent.yearLevel || ""}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                Select year level
+                                            </option>
+                                            <option value="1">1st Year</option>
+                                            <option value="2">2nd Year</option>
+                                            <option value="3">3rd Year</option>
+                                            <option value="4">4th Year</option>
+                                            <option value="5">5th Year</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {newRespondent.course && (
+                                    <div>
+                                        <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
+                                            <input type="text" value={newRespondent.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
+                                            <input
+                                                type="text"
+                                                name="section"
+                                                disabled={newRespondent.yearLevel === ""}
+                                                value={newRespondent.section || ""}
+                                                onChange={(e) =>
+                                                    setNewRespondent({
+                                                        ...newRespondent,
+                                                        section: e.target.value.toUpperCase(),
+                                                    })
+                                                }
+                                                maxLength={8}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="respondents-table-add-respondents-btn-div">
+                                    <button className="save-btn" onClick={handleSaveRespondent}>Save</button>
+                                    <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
                     {filteredAndSortedRespondents.length === 0 ? (
                         <tr>
                             <td style={{ textAlign: "center" }} colSpan={4}>
@@ -521,88 +603,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                 </tr>
                             )
                         ))
-                    )}
-                    {newRespondent && (
-                        <tr>
-                            <td colSpan={4}>
-                                <input type="text" name="name" value={newRespondent?.name || ""} onChange={handleChange} placeholder="Enter name (SURNAME, First Name, M.I.)" required />
-                                <div>
-                                    <select name="college" value={newRespondent.college || ""} onChange={handleChange} required>
-                                        <option value="" disabled>Select college</option>
-                                        {Courses.map(({ college }) => (
-                                            <option key={college} value={college}>
-                                                {college}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {newRespondent.college && (
-                                    <div>
-                                        <select
-                                            name="course"
-                                            value={newRespondent.course || ""}
-                                            onChange={handleChange}
-                                            required
-                                            disabled={!newRespondent.college}
-                                        >
-                                            <option value="" disabled>Select program</option>
-                                            {Courses.find(({ college }) => college === newRespondent.college)?.courses.map(({ name, code }) => (
-                                                <option key={code} value={code}>
-                                                    {name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {newRespondent.course && (
-                                    <div>
-                                        <select
-                                            name="yearLevel"
-                                            value={newRespondent.yearLevel || ""}
-                                            onChange={handleChange}
-                                            required
-                                        >
-                                            <option value="" disabled>
-                                                Select year level
-                                            </option>
-                                            <option value="1">1st Year</option>
-                                            <option value="2">2nd Year</option>
-                                            <option value="3">3rd Year</option>
-                                            <option value="4">4th Year</option>
-                                            <option value="5">5th Year</option>
-                                        </select>
-                                    </div>
-                                )}
-
-                                {newRespondent.course && (
-                                    <div>
-                                        <div style={{ display: "flex", alignItems: "center", verticalAlign: "middle" }}>
-                                            <input type="text" value={newRespondent.yearLevel} disabled style={{ width: "37px", textAlign: "right" }}></input>
-                                            <input
-                                                type="text"
-                                                name="section"
-                                                disabled={newRespondent.yearLevel === ""}
-                                                value={newRespondent.section || ""}
-                                                onChange={(e) =>
-                                                    setNewRespondent({
-                                                        ...newRespondent,
-                                                        section: e.target.value.toUpperCase(),
-                                                    })
-                                                }
-                                                maxLength={8}
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="respondents-table-add-respondents-btn-div">
-                                    <button className="save-btn" onClick={handleSaveRespondent}>Save</button>
-                                    <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
-                                </div>
-                            </td>
-                        </tr>
                     )}
                 </tbody>
             </table>

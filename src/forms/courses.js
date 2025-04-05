@@ -111,7 +111,7 @@ const Courses = [
         "courses": [
             { "name": "Bachelor of Industrial Technology - Major in Automotive", "code": "IndustrialTechnologyA" },
             { "name": "Bachelor of Industrial Technology - Major in Computer", "code": "IndustrialTechnologyC" },
-            { "name": "Bachelor of Industrial Technology - Major in Drafting", "code": "IndustrialTechnologyD" },
+            { "name": "Bachelor of Industrial Technology - Major in Drafting Technology", "code": "IndustrialTechnologyDT" },
             { "name": "Bachelor of Industrial Technology - Major in Electrical", "code": "IndustrialTechnologyE" },
             { "name": "Bachelor of Industrial Technology - Major in Electronics and Communication Technology", "code": "IndustrialTechnologyECT" },
             { "name": "Bachelor of Industrial Technology - Major in Electronics Technology", "code": "IndustrialTechnologyET" },
@@ -119,8 +119,8 @@ const Courses = [
             { "name": "Bachelor of Industrial Technology - Major in Food Service Management", "code": "IndustrialTechnologyFSM" },
             { "name": "Bachelor of Industrial Technology - Major in Heating, Ventilation, Air Conditioning and Refrigeration Technology (HVACR)", "code": "IndustrialTechnologyHVACR" },
             { "name": "Bachelor of Industrial Technology - Major in Industrial Automation", "code": "IndustrialTechnologyIA" },
-            { "name": "Bachelor of Industrial Technology - Major in Mechanical Technology", "code": "IndustrialTechnologyMT" },
-            { "name": "Bachelor of Industrial Technology - Major in Mechatronics Technology", "code": "IndustrialTechnologyMT" },
+            { "name": "Bachelor of Industrial Technology - Major in Mechanical Technology", "code": "IndustrialTechnologyMnT" },
+            { "name": "Bachelor of Industrial Technology - Major in Mechatronics Technology", "code": "IndustrialTechnologyMtT" },
             { "name": "Bachelor of Industrial Technology - Major in Welding Technology", "code": "IndustrialTechnologyWT" },
             { "name": "Bachelor of Science in Industrial Education", "code": "IndustrialEducation" },
             { "name": "Bachelor of Science in Industrial Technology", "code": "IndustrialTechnology" }

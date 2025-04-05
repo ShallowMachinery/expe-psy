@@ -1,4 +1,4 @@
-.home-container, .timeup-parent-container {
+.home-container, .timeup-parent-container, .not-found-parent-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,7 +6,7 @@
     background: #f4f4f4;
   }
   
-  .login-container, .timeup-overlay {
+  .login-container, .timeup-overlay, .not-found-overlay {
     background: white;
     padding: 30px;
     border-radius: 12px;

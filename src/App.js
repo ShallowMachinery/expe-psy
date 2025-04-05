@@ -9,6 +9,7 @@ import T2Form from "./forms/t2";
 import T3Form from "./forms/t3";
 import T4Form from "./forms/t4";
 import RForm from "./forms/rForm";
+import NotFound from "./pages/notFound";
 
 function App() {
   useEffect(() => {
@@ -25,7 +26,7 @@ function App() {
         <Route path="/lcSkgVKARcdUIRUw25j9" element={<T4Form />} />
         <Route path="/time-up" element={<TimeUp />} />
         <Route path="/7q7fbmQylOjPCmnJzFO5" element={<RForm />} />
-        <Route path="*" element={<Home />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

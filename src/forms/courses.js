@@ -2,6 +2,7 @@ const Courses = [
     {
         college: "College of Architecture and Fine Arts",
         courses: [
+            { name: "Bachelor of Fine Arts", code: "FineArts" },
             { name: "Bachelor of Fine Arts - Major in Visual Communication", code: "FineArtsMVC" },
             { name: "Bachelor of Landscape Architecture", code: "LandscapeArchitecture" },
             { name: "Bachelor of Science in Architecture", code: "Architecture" }
@@ -25,6 +26,7 @@ const Courses = [
             { name: "Bachelor of Science in Accountancy", code: "Accountancy" },
             { name: "Bachelor of Science in Accounting Information System", code: "AccountingInformationSystem" },
             { name: "Bachelor of Science in Accounting Technology", code: "AccountingTechnology" },
+            { name: "Bachelor of Science in Business Administration", code: "BusinessAdministration" },
             { name: "Bachelor of Science in Business Administration - Major in Business Economics", code: "BusinessAdministrationMBE" },
             { name: "Bachelor of Science in Business Administration - Major in Financial Management", code: "BusinessAdministrationMFM" },
             { name: "Bachelor of Science in Business Administration - Major in Marketing Management", code: "BusinessAdministrationMMM" },
@@ -41,6 +43,54 @@ const Courses = [
         ]
     },
     {
+        "college": "College of Education",
+        "courses": [
+            { "name": "Bachelor of Early Childhood Education", "code": "EarlyChildhoodEducation" },
+            { "name": "Bachelor of Elementary Education", "code": "ElementaryEducation" },
+            { "name": "Bachelor of Elementary Education - Major in General Education", "code": "ElementaryEducationGE" },
+            { "name": "Bachelor of Elementary Education - Major in Pre-school Education", "code": "ElementaryEducationPE" },
+            { "name": "Bachelor of Library and Information Science", "code": "LibraryInformationScience" },
+            { "name": "Bachelor of Physical Education", "code": "PhysicalEducation" },
+            { "name": "Bachelor of Science in Education", "code": "Education" },
+            { "name": "Bachelor of Science in Home Economics", "code": "HomeEconomics" },
+            { "name": "Bachelor of Science in Home Economics - Major in Food Production Entrepreneurship", "code": "HomeEconomicsFPE" },
+            { "name": "Bachelor of Secondary Education", "code": "SecondaryEducation" },
+            { "name": "Bachelor of Secondary Education - Major in Biological Science", "code": "SecondaryEducationBS" },
+            { "name": "Bachelor of Secondary Education - Major in English", "code": "SecondaryEducationE" },
+            { "name": "Bachelor of Secondary Education - Major in English, minor in Mandarin", "code": "SecondaryEducationEM" },
+            { "name": "Bachelor of Secondary Education - Major in Filipino", "code": "SecondaryEducationF" },
+            { "name": "Bachelor of Secondary Education - Major in Music, Arts, Physical Education, and Health", "code": "SecondaryEducationMAPEH" },
+            { "name": "Bachelor of Secondary Education - Major in Mathematics", "code": "SecondaryEducationM" },
+            { "name": "Bachelor of Secondary Education - Major in Physical Science", "code": "SecondaryEducationPS" },
+            { "name": "Bachelor of Secondary Education - Major in Sciences", "code": "SecondaryEducationS" },
+            { "name": "Bachelor of Secondary Education - Major in Social Studies", "code": "SecondaryEducationSS" },
+            { "name": "Bachelor of Secondary Education - Major in Technology and Livelihood Education", "code": "SecondaryEducationTLE" },
+            { "name": "Bachelor of Secondary Education - Major in Values Education", "code": "SecondaryEducationVE" },
+            { "name": "Bachelor of Technical Teacher Education", "code": "TechnicalTeacherEducation" },
+            { "name": "Bachelor of Technical Teacher Education - Major in Drafting Technology", "code": "TechnicalTeacherEducationDT" },
+            { "name": "Bachelor of Technical Teacher Education - Major in Food Service Management", "code": "TechnicalTeacherEducationFSM" },
+            { "name": "Bachelor of Technical Teacher Education - Major in Garments Fashion Design", "code": "TechnicalTeacherEducationGFD" },
+            { "name": "Bachelor of Technical-Vocational Teacher Education", "code": "TechnicalVocationalTeacherEducation" },
+            { "name": "Bachelor of Technology and Livelihood Education - Major in Home Economics", "code": "TechnologyLivelihoodEducationHE" },
+            { "name": "Bachelor of Technology and Livelihood Education - Major in Industrial Arts", "code": "TechnologyLivelihoodEducationIA" },
+            { "name": "Bachelor of Technology and Livelihood Education - Major in Information and Communication Technology", "code": "TechnologyLivelihoodEducationICT" }
+        ]
+    },
+    {
+        "college": "College of Engineering",
+        "courses": [
+            { "name": "Bachelor of Science in Civil Engineering", "code": "CivilEngineering" },
+            { "name": "Bachelor of Science in Computer Engineering", "code": "ComputerEngineering" },
+            { "name": "Bachelor of Science in Electrical Engineering", "code": "ElectricalEngineering" },
+            { "name": "Bachelor of Science in Electronics Engineering", "code": "ElectronicsEngineering" },
+            { "name": "Bachelor of Science in General Engineering", "code": "GeneralEngineering" },
+            { "name": "Bachelor of Science in Industrial Engineering", "code": "IndustrialEngineering" },
+            { "name": "Bachelor of Science in Manufacturing Engineering", "code": "ManufacturingEngineering" },
+            { "name": "Bachelor of Science in Mechanical Engineering", "code": "MechanicalEngineering" },
+            { "name": "Bachelor of Science in Mechatronics Engineering", "code": "MechatronicsEngineering" }
+        ]
+    },
+    {
         "college": "College of Hospitality and Tourism Management",
         "courses": [
             { "name": "Bachelor of Science in Food Science", "code": "FoodScience" },
@@ -52,7 +102,6 @@ const Courses = [
     {
         "college": "College of Information and Communications Technology",
         "courses": [
-            { "name": "Bachelor of Library and Information Science", "code": "LibraryInformationScience" },
             { "name": "Bachelor of Science in Information System", "code": "InformationSystem" },
             { "name": "Bachelor of Science in Information Technology", "code": "InformationTechnology" }
         ]
@@ -85,43 +134,6 @@ const Courses = [
         "college": "College of Nursing",
         "courses": [
             { "name": "Bachelor of Science in Nursing", "code": "Nursing" }
-        ]
-    },
-    {
-        "college": "College of Engineering",
-        "courses": [
-            { "name": "Bachelor of Science in Civil Engineering", "code": "CivilEngineering" },
-            { "name": "Bachelor of Science in Computer Engineering", "code": "ComputerEngineering" },
-            { "name": "Bachelor of Science in Electrical Engineering", "code": "ElectricalEngineering" },
-            { "name": "Bachelor of Science in Electronics Engineering", "code": "ElectronicsEngineering" },
-            { "name": "Bachelor of Science in General Engineering", "code": "GeneralEngineering" },
-            { "name": "Bachelor of Science in Industrial Engineering", "code": "IndustrialEngineering" },
-            { "name": "Bachelor of Science in Manufacturing Engineering", "code": "ManufacturingEngineering" },
-            { "name": "Bachelor of Science in Mechanical Engineering", "code": "MechanicalEngineering" },
-            { "name": "Bachelor of Science in Mechatronics Engineering", "code": "MechatronicsEngineering" }
-        ]
-    },
-    {
-        "college": "College of Education",
-        "courses": [
-            { "name": "Bachelor of Early Childhood Education", "code": "EarlyChildhoodEducation" },
-            { "name": "Bachelor of Elementary Education", "code": "ElementaryEducation" },
-            { "name": "Bachelor of Physical Education", "code": "PhysicalEducation" },
-            { "name": "Bachelor of Science in Education", "code": "Education" },
-            { "name": "Bachelor of Science in Home Economics", "code": "HomeEconomics" },
-            { "name": "Bachelor of Science in Home Economics - Major in Food Production Entrepreneurship", "code": "HomeEconomicsFPE" },
-            { "name": "Bachelor of Secondary Education", "code": "SecondaryEducation" },
-            { "name": "Bachelor of Secondary Education - Major in English, minor in Mandarin", "code": "SecondaryEducationEM" },
-            { "name": "Bachelor of Secondary Education - Major in Filipino", "code": "SecondaryEducationF" },
-            { "name": "Bachelor of Secondary Education - Major in Mathematics", "code": "SecondaryEducationM" },
-            { "name": "Bachelor of Secondary Education - Major in Sciences", "code": "SecondaryEducationS" },
-            { "name": "Bachelor of Secondary Education - Major in Social Studies", "code": "SecondaryEducationSS" },
-            { "name": "Bachelor of Secondary Education - Major in Values Education", "code": "SecondaryEducationVE" },
-            { "name": "Bachelor of Technical Teacher Education", "code": "TechnicalTeacherEducation" },
-            { "name": "Bachelor of Technical-Vocational Teacher Education", "code": "TechnicalVocationalTeacherEducation" },
-            { "name": "Bachelor of Technology and Livelihood Education - Major in Home Economics", "code": "TechnologyLivelihoodEducationHE" },
-            { "name": "Bachelor of Technology and Livelihood Education - Major in Industrial Arts", "code": "TechnologyLivelihoodEducationIA" },
-            { "name": "Bachelor of Technology and Livelihood Education - Major in Information and Communication Technology", "code": "TechnologyLivelihoodEducationICT" }
         ]
     },
     {

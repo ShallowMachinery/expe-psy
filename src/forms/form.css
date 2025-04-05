@@ -62,9 +62,7 @@
 
   @media (max-width: 768px) {
     .splash-image {
-      border-radius: 25px;
-      -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 1));
-      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 1));
+      border-radius: 5px;
     }
 
     .splash-container {

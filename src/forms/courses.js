@@ -94,7 +94,6 @@ const Courses = [
             { "name": "Bachelor of Science in Food Production and Entrepreneurship", "code": "FoodProductionEntrepreneurship" },
             { "name": "Bachelor of Science in Food Science", "code": "FoodScience" },
             { "name": "Bachelor of Science in Hospitality Management", "code": "HospitalityManagement" },
-            { "name": "Bachelor of Science in Hotel & Restaurant Management", "code": "HotelRestaurantManagement" },
             { "name": "Bachelor of Science in Tourism Management", "code": "TourismManagement" }
         ]
     },

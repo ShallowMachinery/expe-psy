@@ -37,8 +37,7 @@ const Courses = [
     {
         college: "College of Criminal Justice Education",
         courses: [
-            { name: "Bachelor of Arts in Legal Management", code: "ALegalManagement" },
-            { name: "Bachelor of Science in Legal Management", code: "SLegalManagement" },
+            { name: "Bachelor of Arts in Legal Management", code: "LegalManagement" },
             { name: "Bachelor of Science in Criminology", code: "Criminology" }
         ]
     },
@@ -49,7 +48,6 @@ const Courses = [
             { "name": "Bachelor of Elementary Education", "code": "ElementaryEducation" },
             { "name": "Bachelor of Elementary Education - Major in General Education", "code": "ElementaryEducationGE" },
             { "name": "Bachelor of Elementary Education - Major in Pre-school Education", "code": "ElementaryEducationPE" },
-            { "name": "Bachelor of Library and Information Science", "code": "LibraryInformationScience" },
             { "name": "Bachelor of Physical Education", "code": "PhysicalEducation" },
             { "name": "Bachelor of Science in Education", "code": "Education" },
             { "name": "Bachelor of Science in Home Economics", "code": "HomeEconomics" },
@@ -93,6 +91,7 @@ const Courses = [
     {
         "college": "College of Hospitality and Tourism Management",
         "courses": [
+            { "name": "Bachelor of Science in Food Production and Entrepreneurship", "code": "FoodProductionEntrepreneurship" },
             { "name": "Bachelor of Science in Food Science", "code": "FoodScience" },
             { "name": "Bachelor of Science in Hospitality Management", "code": "HospitalityManagement" },
             { "name": "Bachelor of Science in Hotel & Restaurant Management", "code": "HotelRestaurantManagement" },
@@ -100,8 +99,9 @@ const Courses = [
         ]
     },
     {
-        "college": "College of Information and Communications Technology",
+        "college": "College of Information and Communications Technology", 
         "courses": [
+            { "name": "Bachelor of Library and Information Science", "code": "LibraryInformationScience" },
             { "name": "Bachelor of Science in Information System", "code": "InformationSystem" },
             { "name": "Bachelor of Science in Information Technology", "code": "InformationTechnology" }
         ]
@@ -113,10 +113,12 @@ const Courses = [
             { "name": "Bachelor of Industrial Technology with specialization in Computer", "code": "IndustrialTechnologyC" },
             { "name": "Bachelor of Industrial Technology with specialization in Drafting", "code": "IndustrialTechnologyD" },
             { "name": "Bachelor of Industrial Technology with specialization in Electrical", "code": "IndustrialTechnologyE" },
-            { "name": "Bachelor of Industrial Technology with specialization in Electronics & Communication Technology", "code": "IndustrialTechnologyECT" },
+            { "name": "Bachelor of Industrial Technology with specialization in Electronics and Communication Technology", "code": "IndustrialTechnologyECT" },
             { "name": "Bachelor of Industrial Technology with specialization in Electronics Technology", "code": "IndustrialTechnologyET" },
             { "name": "Bachelor of Industrial Technology with specialization in Food Processing Technology", "code": "IndustrialTechnologyFPT" },
+            { "name": "Bachelor of Industrial Technology with specialization in Food Service Management", "code": "IndustrialTechnologyFSM" },
             { "name": "Bachelor of Industrial Technology with specialization in Heating, Ventilation, Air Conditioning and Refrigeration Technology (HVACR)", "code": "IndustrialTechnologyHVACR" },
+            { "name": "Bachelor of Industrial Technology with specialization in Industrial Automation", "code": "IndustrialTechnologyIA" },
             { "name": "Bachelor of Industrial Technology with specialization in Mechanical", "code": "IndustrialTechnologyM" },
             { "name": "Bachelor of Industrial Technology with specialization in Mechatronics Technology", "code": "IndustrialTechnologyMT" },
             { "name": "Bachelor of Industrial Technology with specialization in Welding Technology", "code": "IndustrialTechnologyWT" },
@@ -160,6 +162,9 @@ const Courses = [
     {
         college: 'College of Sports, Exercise and Recreation',
         courses: [
+
+            { name: 'Bachelor in Physical Education - Major in School Physical Education', code: 'PhysicalEducationSPE' },
+            { name: 'Bachelor in Physical Education - Major in Sports and Welness Management', code: 'PhysicalEducationSWM' },
             { name: 'Bachelor of Science in Exercise and Sports Sciences with specialization in Fitness and Sports Coaching', code: 'ExerciseSportsSciencesFSC' },
             { name: 'Bachelor of Science in Exercise and Sports Sciences with specialization in Fitness and Sports Management', code: 'ExerciseSportsSciencesFSM' },
             { name: 'Bachelor of Sports Science', code: 'SportsScience' }

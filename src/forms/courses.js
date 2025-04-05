@@ -110,7 +110,7 @@ const Courses = [
         "college": "College of Industrial Technology",
         "courses": [
             { "name": "Bachelor of Industrial Technology - Major in Automotive", "code": "IndustrialTechnologyA" },
-            { "name": "Bachelor of Industrial Technology - Major in Computer", "code": "IndustrialTechnologyC" },
+            { "name": "Bachelor of Industrial Technology - Major in Computer Technology", "code": "IndustrialTechnologyCT" },
             { "name": "Bachelor of Industrial Technology - Major in Drafting Technology", "code": "IndustrialTechnologyDT" },
             { "name": "Bachelor of Industrial Technology - Major in Electrical", "code": "IndustrialTechnologyE" },
             { "name": "Bachelor of Industrial Technology - Major in Electronics and Communication Technology", "code": "IndustrialTechnologyECT" },

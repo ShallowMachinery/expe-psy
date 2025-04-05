@@ -2,9 +2,6 @@ import { getFirestore, doc, getDoc, setDoc, increment, deleteField, collection, 
 import React, { useState, useEffect, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 import Courses from "../../forms/courses";
-import { dotSpinner } from 'ldrs';
-
-dotSpinner.register();
 
 const formatCourseName = (courseCode) => {
     const courseNames = Object.fromEntries(
@@ -29,8 +26,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
     const [statusFilter, setStatusFilter] = useState("all");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [respondentToDelete, setRespondentToDelete] = useState(null);
-    const [isSaving, setIsSaving] = useState(false);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         setRespondentsEmpty(respondents.length === 0);
@@ -67,7 +62,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
         const respondentsRef = doc(db, "analytics", "respondents");
 
         try {
-            setIsSaving(true);
             const respondentsSnap = await getDoc(respondentsRef);
             const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
@@ -93,9 +87,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
             setNewRespondent(null);
         } catch (error) {
             console.error("Error saving respondent:", error);
-            setError("Error saving respondent:", error);
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -111,7 +102,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
         const formResponsesRef = collection(db, "formResponses");
 
         try {
-            setIsSaving(false);
             const respondentsSnap = await getDoc(respondentsRef);
             const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
@@ -173,9 +163,6 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
             setEditingRespondent(null);
         } catch (error) {
             console.error("Error updating respondent:", error);
-            setError("Error saving respondent:", error);
-        } finally {
-            setIsSaving(true);
         }
     };
 
@@ -407,7 +394,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                     </tr>
                 </thead>
                 <tbody>
-                    {newRespondent && (
+                {newRespondent && (
                         <tr>
                             <td colSpan={4}>
                                 <input type="text" name="name" value={newRespondent?.name || ""} onChange={handleChange} placeholder="Enter name (SURNAME, First Name, M.I.)" required />
@@ -483,18 +470,8 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                     </div>
                                 )}
                                 <div className="respondents-table-add-respondents-btn-div">
-                                    {error && <p>{error}</p>}
-                                    {!isSaving
-                                        ? <>
-                                            <button className="save-btn" onClick={handleSaveRespondent} disabled={!isSaving}>Save</button>
-                                            <button className="cancel-btn" onClick={handleCancel} disabled={!isSaving}>Cancel</button>
-                                        </>
-                                        :
-                                        <div className="saving-spinner">
-                                            <l-dot-spinner size="70" speed="0.7" color="black" />
-                                            <p>Saving...</p>
-                                        </div >
-                                    }
+                                    <button className="save-btn" onClick={handleSaveRespondent}>Save</button>
+                                    <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
                                 </div>
                             </td>
                         </tr>
@@ -589,18 +566,10 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                                 </div>
                                             </div>
                                         )}
-                                        {error && <p>{error}</p>}
-                                        {!isSaving
-                                            ? <div className="actions-div">
-                                                <button className="save-btn edit-btn" onClick={handleSaveEdit}><FaSave /></button>
-                                                <button className="cancel-btn" onClick={handleCancel}><FaTimes /></button>
-                                            </div>
-                                            :
-                                            <div className="saving-spinner">
-                                                <l-dot-spinner size="70" speed="0.7" color="black" />
-                                                <p>Saving...</p>
-                                            </div >
-                                        }
+                                        <div className="actions-div">
+                                            <button className="save-btn edit-btn" onClick={handleSaveEdit}><FaSave /></button>
+                                            <button className="cancel-btn" onClick={handleCancel}><FaTimes /></button>
+                                        </div>
                                     </td>
                                     <td>{getTreatmentText(resp.treatmentLevel)}</td>
                                     <td>{resp.status}</td>

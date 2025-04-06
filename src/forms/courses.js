@@ -169,12 +169,6 @@ const Courses = [
             { name: 'Bachelor of Science in Exercise and Sports Sciences with specialization in Fitness and Sports Management', code: 'ExerciseSportsSciencesFSM' },
             { name: 'Bachelor of Sports Science', code: 'SportsScience' }
         ]
-    },
-    {
-        college: 'Sarmiento Campus',
-        courses: [
-            { name: 'Bachelor of Science in Data Science', code: 'DataScience' }
-        ]
     }
 ];
 

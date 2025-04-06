@@ -37,8 +37,9 @@ const Courses = [
     {
         college: "College of Criminal Justice Education",
         courses: [
-            { name: "Bachelor of Arts in Legal Management", code: "LegalManagement" },
-            { name: "Bachelor of Science in Criminology", code: "Criminology" }
+            { name: "Bachelor of Arts in Legal Management", code: "ALegalManagement" }
+            { name: "Bachelor of Science in Criminology", code: "Criminology" },
+            { name: "Bachelor of Science in Legal Management", code: "SLegalManagement" }
         ]
     },
     {

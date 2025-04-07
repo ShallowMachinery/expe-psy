@@ -107,8 +107,10 @@ const T3Form = () => {
   const prevStep = () => setStep(step - 1);
 
   useEffect(() => {
-    if (step >= 2) {
-      const timer = setInterval(() => {
+    let timer;
+
+    if (step >= 2 && step <= questionData.length + 1) {
+      timer = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
             clearInterval(timer);
@@ -118,9 +120,12 @@ const T3Form = () => {
           return prevTime - 1;
         });
       }, 1000);
-
-      return () => clearInterval(timer);
     }
+
+    if (step === questionData.length + 2) {
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
   }, [step]);
 
   const formatTime = (seconds) => {
@@ -156,6 +161,9 @@ const T3Form = () => {
 
     const finalData = {
       ...formData,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      section: formData.section.trim(),
       scores: formData.responses.map(({ questionId, response }) => {
         const correctAnswer = questionData.find(q => q.questionId === questionId)?.correctAnswer || "";
         return response.trim().toLowerCase() === correctAnswer.toLowerCase() ? 1 : 0;
@@ -419,7 +427,7 @@ const T3Form = () => {
         {step === questionData.length + 2 && (
           <>
             <h2 style={{ marginBottom: "0" }}>Thank you!</h2>
-            <p style={{ textAlign: "center", marginBottom: "10px" }}>Your response have been submitted.</p>
+            <p style={{ textAlign: "center", marginBottom: "10px" }}>Your response have been submitted. You may now close this tab.</p>
           </>
         )}
       </div>

@@ -2,6 +2,7 @@ import { getFirestore, doc, getDoc, setDoc, increment, deleteField, collection, 
 import React, { useState, useEffect, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 import Courses from "../../forms/courses";
+import Response from "./response";
 
 const formatCourseName = (courseCode) => {
     const courseNames = Object.fromEntries(
@@ -26,6 +27,25 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
     const [statusFilter, setStatusFilter] = useState("all");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [respondentToDelete, setRespondentToDelete] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const [selectedRespondent, setSelectedRespondent] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+
+    const handleOpenModal = (respondent) => {
+        setSelectedRespondent(respondent);
+        setShowModal(true);
+        setIsClosing(false);
+    };
+
+    const handleCloseModal = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowModal(false);
+            setSelectedRespondent(null);
+        }, 600);
+    };
 
     useEffect(() => {
         setRespondentsEmpty(respondents.length === 0);
@@ -282,6 +302,13 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
 
     const filteredAndSortedRespondents = useMemo(() => {
         let filtered = [...respondents];
+
+        if (searchQuery.trim() !== "") {
+            filtered = filtered.filter((resp) =>
+                resp.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
         if (sectionFilter !== "all") {
             filtered = filtered.filter(resp => resp.section === sectionFilter);
         }
@@ -301,7 +328,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
             }
             return 0;
         });
-    }, [respondents, sortField, sortDirection, sectionFilter, treatmentFilter, statusFilter]);
+    }, [respondents, searchQuery, sortField, sortDirection, sectionFilter, treatmentFilter, statusFilter]);
 
     const totalPages = Math.ceil(filteredAndSortedRespondents.length / respondentsPerPage);
     const paginatedRespondents = filteredAndSortedRespondents.slice(
@@ -356,8 +383,24 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
             <table className="respondents-table">
                 <thead>
                     <tr>
-                        <th onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
-                            Name {renderSortIcon("name")}
+                        <th style={{ cursor: "pointer" }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                <span onClick={() => handleSort("name")}>
+                                    Name {renderSortIcon("name")}
+                                </span>
+                                <input
+                                    type="text"
+                                    placeholder="Search by name"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    style={{
+                                        marginTop: "5px",
+                                        padding: "5px",
+                                        border: "1px solid #ccc",
+                                        borderRadius: "4px",
+                                    }}
+                                />
+                            </div>
                         </th>
                         <th style={{ width: "200px" }}>
                             Program, Year, Section
@@ -394,7 +437,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                     </tr>
                 </thead>
                 <tbody>
-                {newRespondent && (
+                    {newRespondent && (
                         <tr>
                             <td colSpan={4}>
                                 <input type="text" name="name" value={newRespondent?.name || ""} onChange={handleChange} placeholder="Enter name (SURNAME, First Name, M.I.)" required />
@@ -575,7 +618,15 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                     <td>{resp.status}</td>
                                 </tr>
                             ) : (
-                                <tr key={resp.id || index} style={{ color: resp.status === "Incomplete submission" ? "red" : "inherit" }}>
+                                <tr
+                                    key={resp.id || index}
+                                    style={{
+                                        color:
+                                            resp.status === "Incomplete submission" || resp.section.trim() === ""
+                                                ? "red"
+                                                : "inherit",
+                                    }}
+                                >
                                     <td>
                                         <span style={{ display: "flex", verticalAlign: "middle", justifyContent: "space-between", marginTop: "0px" }}>
                                             {resp.name}
@@ -597,9 +648,19 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                             </div>
                                         </span>
                                     </td>
-                                    <td>{formatCourseName(resp.course)} {resp.yearLevel}{resp.section}</td>
+                                    <td>
+                                        {resp.section
+                                            ? `${formatCourseName(resp.course)} ${resp.yearLevel}${resp.section}`
+                                            : "Incomplete data"}
+                                    </td>
                                     <td>{getTreatmentText(resp.treatmentLevel)}</td>
-                                    <td>{resp.status}</td>
+                                    <td>
+                                        {resp.status === "Submitted" ? (
+                                            <a onClick={() => handleOpenModal(resp)}>{resp.status}</a>
+                                        ) : (
+                                            resp.status
+                                        )}
+                                    </td>
                                 </tr>
                             )
                         ))
@@ -634,6 +695,23 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                             <button className="cancel-btn" onClick={handleDeleteCancel}>Cancel</button>
                             <button className="delete-btn" onClick={handleDeleteConfirm}>Delete</button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className={`modal ${isClosing ? "slide-down" : ""}`}>
+                        {isMobile && <div className="close-button-container-mobile">
+                            <button className="close-modal-btn" onClick={handleCloseModal}>
+                                X
+                            </button>
+                        </div>}
+                        <Response respondent={selectedRespondent} isMobile={isMobile} />
+                        {!isMobile && <div className="close-button-container">
+                            <button className="close-modal-btn" onClick={handleCloseModal}>
+                                Close
+                            </button>
+                        </div>}
                     </div>
                 </div>
             )}

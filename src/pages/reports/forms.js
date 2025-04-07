@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaRegHandPointRight } from "react-icons/fa";
 import Courses from "../../forms/courses";
+import Response from "./response";
 
 const formatCourseName = (courseCode) => {
     const courseNames = Object.fromEntries(
@@ -14,6 +15,9 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
     const [expandedRows, setExpandedRows] = useState({});
     const [copiedLink, setCopiedLink] = useState(null);
     const [copiedRandomLink, setCopiedRandomLink] = useState(null);
+    const [selectedRespondent, setSelectedRespondent] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
     const toggleExpandRow = (treatmentLevel) => {
         setExpandedRows((prev) => ({
@@ -74,6 +78,19 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
         }
     };
 
+    const handleOpenModal = (respondent) => {
+        setSelectedRespondent(respondent);
+        setShowModal(true);
+        setIsClosing(false);
+    };
+
+    const handleCloseModal = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowModal(false);
+            setSelectedRespondent(null);
+        }, 600);
+    };
 
     const treatments = {
         T1: { label: "Treatment Level 1", description: "Free-Labeling (Local/In-group)", formLink: "/XfN4pu0g3lSGXCbwqW4U" },
@@ -160,19 +177,23 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                 <tr className="expanded-row">
                                     <td colSpan={4}>
                                         <strong>Takers:</strong>
-                                        <ul className="survey-takers-list">
+                                        <div className="survey-takers-list">
                                             {respondents.filter(r => r.treatmentLevel === key).length > 0 ? (
                                                 respondents
                                                     .filter(r => r.treatmentLevel === key)
-                                                    .map(r => (
-                                                        <li key={r.id}>
-                                                            {r.name} - {formatCourseName(r.course)} {r.yearLevel}{r.section}
-                                                        </li>
+                                                    .map((r, index) => (
+                                                        <button
+                                                            key={r.name + index}
+                                                            className="open-respondent-details-btn"
+                                                            onClick={() => handleOpenModal(r)}
+                                                        >
+                                                            {index + 1}. {r.name} - {formatCourseName(r.course)} {r.yearLevel}{r.section}
+                                                        </button>
                                                     ))
                                             ) : (
-                                                <li>No respondents yet.</li>
+                                                <p>No respondents yet.</p>
                                             )}
-                                        </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -180,6 +201,24 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                     ))}
                 </tbody>
             </table>
+
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className={`modal ${isClosing ? "slide-down" : ""}`}>
+                        {isMobile && <div className="close-button-container-mobile">
+                            <button className="close-modal-btn" onClick={handleCloseModal}>
+                                X
+                            </button>
+                        </div>}
+                        <Response respondent={selectedRespondent} isMobile={isMobile} />
+                        {!isMobile && <div className="close-button-container">
+                            <button className="close-modal-btn" onClick={handleCloseModal}>
+                                Close
+                            </button>
+                        </div>}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -19,9 +19,22 @@ const questionData = [
 ];
 
 const T4Form = () => {
+  const [haveSubmitted, setHaveSubmitted] = useState(false);
+  const [isIncompleteSubmission, setIsIncompleteSubmission] = useState(false);
   const [step, setStep] = useState(1);
   const [isDisabled, setIsDisabled] = useState(false);
   const [timeLeft, setTimeLeft] = useState(360);
+
+  useEffect(() => {
+    let submitted;
+    if (sessionStorage.getItem("submitted") === "incomplete") {
+      setIsIncompleteSubmission(true);
+    }
+    if (sessionStorage.getItem("submitted") === "true") {
+      submitted = true;
+    }
+    setHaveSubmitted(submitted);
+  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -149,6 +162,7 @@ const T4Form = () => {
         await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
       }
 
+      sessionStorage.setItem("submitted", "incomplete");
       window.location.href = "/time-up";
     } catch (error) {
       console.error("Error marking incomplete submission:", error);
@@ -184,7 +198,15 @@ const T4Form = () => {
 
       if (respondentId) {
         if (currentRespondents[respondentId].status === "Submitted") {
-          alert("You have already submitted this form before. Your new response will not be saved.");
+          sessionStorage.removeItem("assignedForm");
+
+          const analyticsRef = doc(db, "analytics", "formCount");
+          await updateDoc(analyticsRef, {
+            [treatmentField]: increment(-1)
+          });
+
+          sessionStorage.setItem("submitted", true);
+          window.location.href = "/already-submitted";
           return;
         } else {
           currentRespondents[respondentId].status = "Submitted";
@@ -202,16 +224,36 @@ const T4Form = () => {
       }
 
       await addDoc(collection(db, "formResponses"), finalData);
-      const analyticsRef = doc(db, "analytics", "formCount");
-      await updateDoc(analyticsRef, {
-        [treatmentField]: increment(1)
-      });
+      sessionStorage.removeItem("assignedForm");
+      sessionStorage.setItem("submitted", true);
 
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
     }
   };
+
+  if (haveSubmitted) {
+    return (
+      <div className="parent-form-container">
+        <div className="container">
+          <h2 style={{ marginBottom: "0" }}>Sorry!</h2>
+          <p style={{ textAlign: "center", marginBottom: "10px" }}>You have already submitted your response.</p>
+        </div>
+      </div>
+    );
+  };
+
+  if (isIncompleteSubmission) {
+    return (
+      <div className="parent-form-container">
+        <div className="container">
+          <h2 style={{ marginBottom: "0" }}>Sorry!</h2>
+          <p style={{ textAlign: "center", marginBottom: "10px" }}>You had an incomplete submission. You can't submit a response anymore.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="parent-form-container">

@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, addDoc, setDoc, doc, getDocs, getDoc, query, where, updateDoc, increment, writeBatch, deleteField } from "firebase/firestore";
+import { getFirestore, collection, addDoc, setDoc, doc, getDocs, getDoc, query, where, updateDoc, increment, writeBatch, deleteField, runTransaction } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -16,4 +16,4 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
-export { app, analytics, db, collection, addDoc, setDoc, doc, getDocs, getDoc, query, where, updateDoc, increment, writeBatch, deleteField };
+export { app, analytics, db, collection, addDoc, setDoc, doc, getDocs, getDoc, query, where, updateDoc, increment, writeBatch, deleteField, runTransaction };

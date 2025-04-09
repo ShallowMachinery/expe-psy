@@ -12,13 +12,20 @@ import T4Form from "./forms/t4";
 import RForm from "./forms/rForm";
 import NotFound from "./pages/notFound";
 import Response from "./pages/reports/response";
+import alreadySubmitted from "./pages/alreadySubmitted";
 import { dotSpinner } from 'ldrs';
 
 dotSpinner.register();
 
 function App() {
+  const [haveSubmitted, setHaveSubmitted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const submitted = sessionStorage.getItem("submitted") !== null;
+    setHaveSubmitted(submitted);
+  }, []);
 
   useEffect(() => {
     const auth = getAuth();
@@ -63,6 +70,7 @@ function App() {
         <Route path="/lcSkgVKARcdUIRUw25j9" element={<T4Form />} />
         <Route path="/time-up" element={<TimeUp />} />
         <Route path="/7q7fbmQylOjPCmnJzFO5" element={<RForm />} />
+        <Route path="/already-submitted" element={haveSubmitted ? <alreadySubmitted /> : <NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

@@ -78,7 +78,7 @@ const Reports = () => {
 
         if (respondentsSnap.exists()) {
           const respondentsData = respondentsSnap.data().list || {};
-          const formattedRespondents = Object.entries(respondentsData).map(([id, details]) => ({
+          const rawRespondents = Object.entries(respondentsData).map(([id, details]) => ({
             id,
             name: details.name,
             course: details.course,
@@ -87,9 +87,31 @@ const Reports = () => {
             treatmentLevel: details.treatmentLevel,
             status: details.status
           }));
-          setRespondents(formattedRespondents);
-        }
 
+          const formResponsesRef = collection(db, "formResponses");
+          const formResponsesSnap = await getDocs(formResponsesRef);
+          const formResponsesData = formResponsesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+          const enrichedRespondents = rawRespondents.map((respondent) => {
+            if (respondent.status === "Submitted") {
+              const matchedResponse = formResponsesData.find((response) =>
+                response.name === respondent.name &&
+                response.course === respondent.course &&
+                response.yearLevel === respondent.yearLevel
+              );
+              return {
+                ...respondent,
+                submittedAt: matchedResponse?.submittedAt || null
+              };
+            } else {
+              return {
+                ...respondent,
+                submittedAt: null
+              };
+            }
+          });
+          setRespondents(enrichedRespondents);
+        }
       } catch (error) {
         console.error("Error checking admin access:", error);
         navigate("/");

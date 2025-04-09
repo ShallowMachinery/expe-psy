@@ -11,6 +11,12 @@ const formatCourseName = (courseCode) => {
     return courseNames[courseCode] || courseCode;
 };
 
+const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+    return date.toLocaleString(undefined, options);
+}
+
 const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenSize }) => {
     const isMobile = useScreenSize();
 
@@ -105,6 +111,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
 
             setAddRespondentButtonEnabled(true);
             setNewRespondent(null);
+
         } catch (error) {
             console.error("Error saving respondent:", error);
         }
@@ -181,6 +188,8 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
             })));
 
             setEditingRespondent(null);
+            window.location.reload();
+
         } catch (error) {
             console.error("Error updating respondent:", error);
         }
@@ -318,8 +327,17 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
         if (statusFilter !== "all") {
             filtered = filtered.filter(resp => resp.status === statusFilter);
         }
+        if (statusFilter === "Submitted") {
+            filtered = filtered.filter(resp => resp.submittedAt !== null);
+        }
 
         return filtered.sort((a, b) => {
+            if (statusFilter === "Submitted") {
+                const dateA = new Date(a.submittedAt);
+                const dateB = new Date(b.submittedAt);
+                return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+            }
+
             if (a[sortField] < b[sortField]) {
                 return sortDirection === "asc" ? -1 : 1;
             }
@@ -418,21 +436,24 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                 <option value="T2">T2 - Free-Labeling (Foreign/Out-group)</option>
                                 <option value="T3">T3 - Discrete Emotion (Local/In-group)</option>
                                 <option value="T4">T4 - Discrete Emotion (Foreign/Out-group)</option>
-                                <option value="N/A">N/A</option>
                             </select>
                         </th>
-                        <th>
-                            Status
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => handleFilterChange("status", e.target.value)}
-                                className="filter-dropdown"
-                            >
-                                <option value="all">All Statuses</option>
-                                <option value="Expected">Expected</option>
-                                <option value="Submitted">Submitted</option>
-                                <option value="Incomplete submission">Incomplete submission</option>
-                            </select>
+                        <th style={{ cursor: "pointer" }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                <span onClick={() => handleSort("status")}>
+                                    Status {renderSortIcon("status")}
+                                </span>
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => handleFilterChange("status", e.target.value)}
+                                    className="filter-dropdown"
+                                >
+                                    <option value="all">All Statuses</option>
+                                    <option value="Expected">Expected</option>
+                                    <option value="Submitted">Submitted</option>
+                                    <option value="Incomplete submission">Incomplete submission</option>
+                                </select>
+                            </div>
                         </th>
                     </tr>
                 </thead>
@@ -656,7 +677,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                     <td>{getTreatmentText(resp.treatmentLevel)}</td>
                                     <td>
                                         {resp.status === "Submitted" ? (
-                                            <a onClick={() => handleOpenModal(resp)}>{resp.status}</a>
+                                            <a style={{ color: resp.submittedAt === null ? "red" : "inherit" }} onClick={() => handleOpenModal(resp)}>{resp.status}<br></br>{resp.submittedAt === null ? "Needs checking" : formatDateTime(resp.submittedAt)}</a>
                                         ) : (
                                             resp.status
                                         )}

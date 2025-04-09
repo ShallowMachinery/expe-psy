@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, runTransaction } from "firebase/firestore";
 import { db } from "../firebase";
 import { dotSpinner } from 'ldrs';
 
 dotSpinner.register();
 
 const RForm = () => {
+  const [haveSubmitted, setHaveSubmitted] = useState(false);
   const navigate = useNavigate();
   const [showSplash, setShowSplash] = useState(true);
   const [loading, setLoading] = useState(false);
   const [imagePath, setImagePath] = useState("");
+
+  useEffect(() => {
+    const submitted = sessionStorage.getItem("submitted") !== null;
+    setHaveSubmitted(submitted);
+  }, []);
 
   useEffect(() => {
     const updateImagePath = () => {
@@ -38,10 +44,21 @@ const RForm = () => {
   const fetchFormCountsAndNavigate = async () => {
     setLoading(true);
     try {
-      const formCountRef = doc(db, "analytics", "formCount");
-      const formCountSnap = await getDoc(formCountRef);
+      const assignedForm = sessionStorage.getItem("assignedForm");
+      if (assignedForm) {
+        navigate(assignedForm);
+        return;
+      }
 
-      if (formCountSnap.exists()) {
+      const formCountRef = doc(db, "analytics", "formCount");
+
+      await runTransaction(db, async (transaction) => {
+        const formCountSnap = await getDoc(formCountRef);
+
+        if (!formCountSnap.exists()) {
+          throw new Error("Form count data does not exist in Firebase.");
+        }
+
         const formCounts = formCountSnap.data();
 
         const forms = [
@@ -56,41 +73,55 @@ const RForm = () => {
 
         if (availableForms.length > 0) {
           const selectedForm = availableForms[0];
+          transaction.update(formCountRef, {
+            [selectedForm.type]: formCounts[selectedForm.type] + 1
+          });
+          sessionStorage.setItem("assignedForm", selectedForm.id);
           navigate(selectedForm.id);
         } else {
           console.error("All forms have reached the limit of 32.");
           navigate("/");
         }
-      } else {
-        console.error("Form count data does not exist in Firebase.");
-        navigate("/");
-      }
+      });
     } catch (error) {
       console.error("Error fetching form counts:", error);
       navigate("/");
+    } finally {
+      setLoading(false);
     }
   };
 
-return (
-  <div className="splash-container">
-    {showSplash ? (
-      <div className="splash-screen">
-        <img src={imagePath} alt="Splash" className="splash-image" />
-        <button
-          className="get-started-btn"
-          onClick={() => { setShowSplash(false); fetchFormCountsAndNavigate(); }}
-        >
-          Get started
-        </button>
+  if (haveSubmitted) {
+    return (
+      <div className="parent-form-container">
+        <div className="container">
+          <h2 style={{ marginBottom: "0" }}>Sorry!</h2>
+          <p style={{ textAlign: "center", marginBottom: "10px" }}>You have already submitted your response. Thank you for participating!</p>
+        </div>
       </div>
-    ) : (
-      <div className="loading-spinner">
-        <l-dot-spinner size="70" speed="0.7" color="black" />
-        <p>Loading...</p>
-      </div>
-    )}
-  </div>
-);
+    );
+  };
+
+  return (
+    <div className="splash-container">
+      {showSplash ? (
+        <div className="splash-screen">
+          <img src={imagePath} alt="Splash" className="splash-image" />
+          <button
+            className="get-started-btn"
+            onClick={() => { setShowSplash(false); fetchFormCountsAndNavigate(); }}
+          >
+            Get started
+          </button>
+        </div>
+      ) : (
+        <div className="loading-spinner">
+          <l-dot-spinner size="70" speed="0.7" color="black" />
+          <p>Loading...</p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default RForm;

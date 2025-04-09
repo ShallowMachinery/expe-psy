@@ -10,6 +10,12 @@ const formatCourseName = (courseCode) => {
     return courseNames[courseCode] || courseCode;
 };
 
+const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+    return date.toLocaleString(undefined, options);
+}
+
 const Forms = ({ formCounts, respondents, useScreenSize }) => {
     const isMobile = useScreenSize();
     const [expandedRows, setExpandedRows] = useState({});
@@ -181,13 +187,14 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                             {respondents.filter(r => r.treatmentLevel === key).length > 0 ? (
                                                 respondents
                                                     .filter(r => r.treatmentLevel === key)
+                                                    .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
                                                     .map((r, index) => (
                                                         <button
                                                             key={r.name + index}
                                                             className="open-respondent-details-btn"
                                                             onClick={() => handleOpenModal(r)}
                                                         >
-                                                            {index + 1}. {r.name} - {formatCourseName(r.course)} {r.yearLevel}{r.section}
+                                                            {index + 1}. {r.name} - {formatCourseName(r.course)} {r.yearLevel}{r.section} - {formatDateTime(r.submittedAt)}
                                                         </button>
                                                     ))
                                             ) : (

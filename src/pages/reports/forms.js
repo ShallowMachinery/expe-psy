@@ -1,19 +1,27 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaRegHandPointRight } from "react-icons/fa";
-import Courses from "../../forms/courses";
 import Response from "./response";
 
-const formatCourseName = (courseCode) => {
-    const courseNames = Object.fromEntries(
-        Courses.flatMap(({ courses }) => courses.map(({ name, code }) => [code, name]))
-    );
-    return courseNames[courseCode] || courseCode;
-};
+const schedule = (date) => {
+    const inputDate = new Date(date);
 
-const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-    return date.toLocaleString(undefined, options);
+    if (inputDate >= new Date("2025-04-07T02:00:00Z") && inputDate <= new Date("2025-04-07T02:30:00Z")) {
+        return "Monday (April 7), 10:00 AM - 10:30 AM";
+    } else if (inputDate >= new Date("2025-04-07T07:00:00Z") && inputDate <= new Date("2025-04-07T07:30:00Z")) {
+        return "Monday (April 7), 3:00 PM - 3:30 PM";
+    } else if (inputDate >= new Date("2025-04-09T02:00:00Z") && inputDate <= new Date("2025-04-09T02:30:00Z")) {
+        return "Wednesday (April 9), 10:00 AM - 10:30 AM";
+    } else if (inputDate >= new Date("2025-04-09T04:00:00Z") && inputDate <= new Date("2025-04-09T04:30:00Z")) {
+        return "Wednesday (April 9), 12:00 PM - 12:30 PM";
+    } else if (inputDate >= new Date("2025-04-09T07:00:00Z") && inputDate <= new Date("2025-04-09T08:30:00Z")) {
+        return "Wednesday (April 9), 3:00 PM - 3:30 PM";
+    } else if (inputDate >= new Date("2025-04-10T02:00:00Z") && inputDate <= new Date("2025-04-10T02:30:00Z")) {
+        return "Thursday (April 10), 10:00 AM - 10:30 AM";
+    } else if (inputDate >= new Date("2025-04-12T02:00:00Z") && inputDate <= new Date("2025-04-12T02:30:00Z")) {
+        return "Saturday (April 12), 10:00 AM - 10:30 AM";
+    } else if (inputDate >= new Date("2025-04-12T07:00:00Z") && inputDate <= new Date("2025-04-12T07:30:00Z")) {
+        return "Saturday (April 12), 3:00 PM - 3:30 PM";
+    }
 }
 
 const Forms = ({ formCounts, respondents, useScreenSize }) => {
@@ -185,18 +193,25 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                         <strong>Takers:</strong>
                                         <div className="survey-takers-list">
                                             {respondents.filter(r => r.treatmentLevel === key).length > 0 ? (
-                                                respondents
-                                                    .filter(r => r.treatmentLevel === key)
-                                                    .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
-                                                    .map((r, index) => (
-                                                        <button
-                                                            key={r.name + index}
-                                                            className="open-respondent-details-btn"
-                                                            onClick={() => handleOpenModal(r)}
-                                                        >
-                                                            {index + 1}. {r.name} - {formatCourseName(r.course)} {r.yearLevel}{r.section} - {formatDateTime(r.submittedAt)}
-                                                        </button>
-                                                    ))
+                                                <table className="respondents-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Assigned Schedule</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {respondents
+                                                            .filter(r => r.treatmentLevel === key)
+                                                            .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)) 
+                                                            .map((r, index) => (
+                                                                <tr key={r.name + index}>
+                                                                    <td onClick={() => {handleOpenModal(r)}} style={{ cursor: "pointer" }}>{r.name}</td>
+                                                                    <td>{schedule(r.submittedAt)}</td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
                                             ) : (
                                                 <p>No respondents yet.</p>
                                             )}

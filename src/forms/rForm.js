@@ -19,7 +19,7 @@ const RForm = () => {
 
     updateImagePath();
     window.addEventListener("resize", updateImagePath);
-    
+
     return () => window.removeEventListener("resize", updateImagePath);
   }, []);
 
@@ -33,7 +33,7 @@ const RForm = () => {
     return () => {
       document.body.style.backgroundColor = "";
     };
-  }, [showSplash]); 
+  }, [showSplash]);
 
   const fetchFormCountsAndNavigate = async () => {
     setLoading(true);
@@ -43,16 +43,20 @@ const RForm = () => {
 
       if (formCountSnap.exists()) {
         const formCounts = formCountSnap.data();
-        const forms = [];
 
-        if (formCounts.T1 < 32) forms.push("/XfN4pu0g3lSGXCbwqW4U");
-        if (formCounts.T2 < 32) forms.push("/h9BVtFjY5EpI3s2Jj1eA");
-        if (formCounts.T3 < 32) forms.push("/DNf1XbrdcE5vgxiEmv13");
-        if (formCounts.T4 < 32) forms.push("/lcSkgVKARcdUIRUw25j9");
+        const forms = [
+          { id: "/XfN4pu0g3lSGXCbwqW4U", type: "T1", count: formCounts.T1 },
+          { id: "/h9BVtFjY5EpI3s2Jj1eA", type: "T2", count: formCounts.T2 },
+          { id: "/DNf1XbrdcE5vgxiEmv13", type: "T3", count: formCounts.T3 },
+          { id: "/lcSkgVKARcdUIRUw25j9", type: "T4", count: formCounts.T4 }
+        ];
 
-        if (forms.length > 0) {
-          const randomForm = forms[Math.floor(Math.random() * forms.length)];
-          navigate(randomForm);
+        forms.sort((a, b) => a.count - b.count);
+        const availableForms = forms.filter(form => form.count < 32);
+
+        if (availableForms.length > 0) {
+          const selectedForm = availableForms[0];
+          navigate(selectedForm.id);
         } else {
           console.error("All forms have reached the limit of 32.");
           navigate("/");
@@ -68,25 +72,25 @@ const RForm = () => {
   };
 
 return (
-    <div className="splash-container">
-      {showSplash ? (
-        <div className="splash-screen">
-          <img src={imagePath} alt="Splash" className="splash-image" />
-          <button
-            className="get-started-btn"
-            onClick={() => { setShowSplash(false); fetchFormCountsAndNavigate(); }}
-          >
-            Get started
-          </button>
-        </div>
-      ) : (
-        <div className="loading-spinner">
-          <l-dot-spinner size="70" speed="0.7" color="black" />
-          <p>Loading...</p>
-        </div>
-      )}
-    </div>
-  );
+  <div className="splash-container">
+    {showSplash ? (
+      <div className="splash-screen">
+        <img src={imagePath} alt="Splash" className="splash-image" />
+        <button
+          className="get-started-btn"
+          onClick={() => { setShowSplash(false); fetchFormCountsAndNavigate(); }}
+        >
+          Get started
+        </button>
+      </div>
+    ) : (
+      <div className="loading-spinner">
+        <l-dot-spinner size="70" speed="0.7" color="black" />
+        <p>Loading...</p>
+      </div>
+    )}
+  </div>
+);
 };
 
 export default RForm;

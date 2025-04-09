@@ -175,7 +175,7 @@ const T2Form = () => {
     if (!userResponse || !answerGroup || !answerGroups[answerGroup]) return 0;
 
     const { exact, related, unrelated } = answerGroups[answerGroup];
-    const normalizedResponse = userResponse.toLowerCase();
+    const normalizedResponse = userResponse.toLowerCase().trim();
 
     if (exact.some(ans => ans.toLowerCase() === normalizedResponse)) return 1.0;
     if (related.some(ans => ans.toLowerCase() === normalizedResponse)) return 0.5;

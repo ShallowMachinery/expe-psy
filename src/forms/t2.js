@@ -45,7 +45,7 @@ const T2Form = () => {
     if (!userAnswer || !answerGroup) return 0;
 
     const scoreFromGroup = checkAnswerGroup(userAnswer, answerGroup);
-    if (scoreFromGroup === 0) {
+    if (scoreFromGroup === 0 || scoreFromGroup === null) {
       const apiKey = process.env.REACT_APP_GROQ_API_KEY;
       const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
 

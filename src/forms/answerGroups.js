@@ -1,7 +1,7 @@
 const answerGroups = {
   "Happiness": {
     exact: ["Happiness", "Kasiyahan", "Happy", "Masaya"],
-    related: ["Maligaya", "Natutuwa", "Nagagalak", "Cheerful", "Joyful", "Glad", "Yehey", "Yippie", "Merry", "Delighted", "Thrilled", "Satisfied"],
+    related: ["Maligaya", "Natutuwa", "Nagagalak", "Cheerful", "Joyful", "Glad", "Yehey", "Yippie", "Merry", "Delighted", "Thrilled", "Satisfied", "Excited"],
     unrelated: ["Galit", "Suklam", "Naiinis", "Nabubuwisit", "Nabubwisit", "Naiirita", "Annoyed", "Irritated", "Rage", "Hatred", "Malungkot", "Pighati", "Nagluluksa", "Hinagpis", "Nalulumbay", "Naiiyak", "Unhappy", "Forlorn", "Heartbroken", "Gloomy", "Depressed", "Kadiri", "Nasusuya", "Nagsasawa", "Nakakasuka", "Icky", "Repulsed", "Gross", "Yuck", "Ew", "Takot", "Kaba", "Pangamba", "Nakapagpapabagabag", "Natataranta", "Scared", "Afraid", "Anxious", "Fearful", "Panic", "Terrified", "Gulat", "Nabigla", "Pagkamangha", "Nagimbal", "Shocked", "Stunned", "Astonished", "Startled", "Buwisit", "Bwisit"]
   },
   "Disgust": {
@@ -16,12 +16,12 @@ const answerGroups = {
   },
   "Fear": {
     exact: ["Fear", "Pagkatakot", "Takot", "Natatakot", "Fearful"],
-    related: ["Kaba", "Pangamba", "Nakapagpabagabag", "Natataranta", "Scared", "Afraid", "Anxious", "Panic", "Terrified"],
+    related: ["Kaba", "Pangamba", "Nakapagpabagabag", "Natataranta", "Scared", "Afraid", "Anxious", "Panic", "Terrified", "Worried"],
     unrelated: ["Masaya", "Maligaya", "Natutuwa", "Nagagalak", "Cheerful", "Joyful", "Glad", "Yehey", "Yippie", "Merry", "Delighted", "Thrilled", "Satisfied", "Galit", "Suklam", "Naiinis", "Nabubwisit", "Naiirita", "Annoyed", "Irritated", "Rage", "Hatred", "Malungkot", "Pighati", "Nagluluksa", "Hinagpis", "Nalulumbay", "Naiiyak", "Unhappy", "Forlorn", "Heartbroken", "Gloomy", "Depressed", "Kadiri", "Nasusuya", "Nagsasawa", "Nakakasuka", "Icky", "Repulsed", "Gross", "Yuck", "Ew", "Gulat", "Nabigla", "Pagkamangha", "Nagimbal", "Shocked", "Stunned", "Astonished", "Startled"]
   },
   "Anger": {
     exact: ["Anger", "Angry", "Pagkagalit", "Galit"],
-    related: ["Suklam", "Naiinis", "Nabubuwisit", "Nabubwisit", "Naiirita", "Annoyed", "Irritated", "Rage", "Hatred", "Buwisit", "Bwisit"],
+    related: ["Suklam", "Naiinis", "Nabubuwisit", "Nabubwisit", "Naiirita", "Annoyed", "Irritated", "Rage", "Hatred", "Buwisit", "Bwisit", "Mad", "Dismay"],
     unrelated: ["Masaya", "Maligaya", "Natutuwa", "Nagagalak", "Cheerful", "Joyful", "Glad", "Yehey", "Yippie", "Merry", "Delighted", "Thrilled", "Satisfied", "Malungkot", "Pighati", "Nagluluksa", "Hinagpis", "Nalulumbay", "Naiiyak", "Unhappy", "Forlorn", "Heartbroken", "Gloomy", "Depressed", "Kadiri", "Nasusuya", "Nagsasawa", "Nakakasuka", "Icky", "Repulsed", "Gross", "Yuck", "Ew", "Takot", "Kaba", "Pangamba", "Nakapagpapabagabag", "Natataranta", "Scared", "Afraid", "Anxious", "Fearful", "Panic", "Terrified", "Gulat", "Nabigla", "Pagkamangha", "Nagimbal", "Shocked", "Stunned", "Astonished", "Startled"]
   },
   "Sadness": {

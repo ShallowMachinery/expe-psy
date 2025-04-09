@@ -46,7 +46,7 @@ const Home = () => {
                 return;
             }
 
-            sessionStorage.setItem("adminName", adminName);
+            localStorage.setItem("adminName", adminName);
 
             navigate("/reports");
         } catch (err) {

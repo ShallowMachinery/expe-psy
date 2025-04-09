@@ -23,7 +23,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const submitted = sessionStorage.getItem("submitted") !== null;
+    const submitted = localStorage.getItem("submitted") !== null;
     setHaveSubmitted(submitted);
   }, []);
 
@@ -36,7 +36,6 @@ function App() {
       } else {
         setIsAuthenticated(false);
       }
-      console.log("User authentication status:", user ? "Authenticated" : "Not authenticated");
       setLoading(false);
     });
 

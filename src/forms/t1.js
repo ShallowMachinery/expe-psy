@@ -29,10 +29,10 @@ const T1Form = () => {
 
   useEffect(() => {
     let submitted;
-    if (sessionStorage.getItem("submitted") === "incomplete") {
+    if (localStorage.getItem("submitted") === "incomplete") {
       setIsIncompleteSubmission(true);
     }
-    if (sessionStorage.getItem("submitted") === "true") {
+    if (localStorage.getItem("submitted") === "true") {
       submitted = true;
     }
     setHaveSubmitted(submitted);
@@ -224,7 +224,7 @@ const T1Form = () => {
         await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
       }
 
-      sessionStorage.setItem("submitted", "incomplete");
+      localStorage.setItem("submitted", "incomplete");
       window.location.href = "/time-up";
     } catch (error) {
       console.error("Error marking incomplete submission:", error);
@@ -271,14 +271,14 @@ const T1Form = () => {
 
       if (respondentId) {
         if (currentRespondents[respondentId].status === "Submitted") {
-          sessionStorage.removeItem("assignedForm");
+          localStorage.removeItem("assignedForm");
 
           const analyticsRef = doc(db, "analytics", "formCount");
           await updateDoc(analyticsRef, {
             [treatmentField]: increment(-1)
           });
 
-          sessionStorage.setItem("submitted", true);
+          localStorage.setItem("submitted", true);
           window.location.href = "/already-submitted";
           return;
         } else {
@@ -297,8 +297,8 @@ const T1Form = () => {
       }
 
       await addDoc(collection(db, "formResponses"), finalData);
-      sessionStorage.removeItem("assignedForm");
-      sessionStorage.setItem("submitted", true);
+      localStorage.removeItem("assignedForm");
+      localStorage.setItem("submitted", true);
 
     } catch (error) {
       console.error("Error submitting form:", error);

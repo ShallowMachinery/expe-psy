@@ -14,7 +14,7 @@ const RForm = () => {
   const [imagePath, setImagePath] = useState("");
 
   useEffect(() => {
-    const submitted = sessionStorage.getItem("submitted") !== null;
+    const submitted = localStorage.getItem("submitted") !== null;
     setHaveSubmitted(submitted);
   }, []);
 
@@ -44,7 +44,7 @@ const RForm = () => {
   const fetchFormCountsAndNavigate = async () => {
     setLoading(true);
     try {
-      const assignedForm = sessionStorage.getItem("assignedForm");
+      const assignedForm = localStorage.getItem("assignedForm");
       if (assignedForm) {
         navigate(assignedForm);
         return;
@@ -76,7 +76,7 @@ const RForm = () => {
           transaction.update(formCountRef, {
             [selectedForm.type]: formCounts[selectedForm.type] + 1
           });
-          sessionStorage.setItem("assignedForm", selectedForm.id);
+          localStorage.setItem("assignedForm", selectedForm.id);
           navigate(selectedForm.id);
         } else {
           console.error("All forms have reached the limit of 32.");

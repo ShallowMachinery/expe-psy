@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaRegHandPointRight } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaExclamationTriangle, FaRedo, FaRegHandPointRight } from "react-icons/fa";
 import Response from "./response";
 
 const schedule = (date) => {
@@ -113,6 +113,11 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
         T4: { label: "Treatment Level 4", description: "Discrete Emotion (Foreign/Out-group)", formLink: "/lcSkgVKARcdUIRUw25j9" },
     };
 
+    const treatmentCounts = respondents.reduce((acc, resp) => {
+        acc[resp.treatmentLevel] = (acc[resp.treatmentLevel] || 0) + 1;
+        return acc;
+    }, {});
+
     return (
         <div className="card" id="forms-card">
             <h2 className="card-title">Forms</h2>
@@ -146,7 +151,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                     </span>
                                 </td>
                                 <td>{description}</td>
-                                <td>{formCounts[key] || 0} / 32</td>
+                                <td title={treatmentCounts[key] !== formCounts[key] ? "Form counts are not matching in the database, please report this to us." : ""}><div style={{ display: "flex", justifyContent: "space-between", verticalAlign: "middle", alignItems: "center" }}>{treatmentCounts[key] || 0} / 32 {treatmentCounts[key] !== formCounts[key] ? <FaExclamationTriangle style={{ color: "red" }}/> : ""}</div></td>
                                 <td>
                                     <span style={{ marginTop: "0px", gap: "5px", display: "flex", justifyContent: "space-between", alignItems: "center", verticalAlign: "middle" }}>
                                         {isMobile
@@ -203,10 +208,10 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                                     <tbody>
                                                         {respondents
                                                             .filter(r => r.treatmentLevel === key)
-                                                            .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)) 
+                                                            .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
                                                             .map((r, index) => (
                                                                 <tr key={r.name + index}>
-                                                                    <td onClick={() => {handleOpenModal(r)}} style={{ cursor: "pointer" }}>{r.name}</td>
+                                                                    <td onClick={() => { handleOpenModal(r) }} style={{ cursor: "pointer" }}>{r.name}</td>
                                                                     <td>{schedule(r.submittedAt)}</td>
                                                                 </tr>
                                                             ))}
@@ -241,6 +246,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                     </div>
                 </div>
             )}
+
         </div>
     );
 };

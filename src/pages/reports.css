@@ -117,9 +117,8 @@
   background: none;
 }
 
-.copy-button {
+.copy-button, .refresh-button {
   font-size: small;
-  gap: 6px;
   color: #715937;
   background: none;
   padding: 0;
@@ -127,7 +126,7 @@
   margin-top: 5px;
 }
 
-.copy-button:hover {
+.copy-button:hover, .refresh-button:hover {
   background: none;
 }
 

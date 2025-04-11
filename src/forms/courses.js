@@ -112,7 +112,7 @@ const Courses = [
             { "name": "Bachelor of Industrial Technology - Major in Automotive", "code": "IndustrialTechnologyA" },
             { "name": "Bachelor of Industrial Technology - Major in Computer Technology", "code": "IndustrialTechnologyCT" },
             { "name": "Bachelor of Industrial Technology - Major in Drafting Technology", "code": "IndustrialTechnologyDT" },
-            { "name": "Bachelor of Industrial Technology - Major in Electrical", "code": "IndustrialTechnologyE" },
+            { "name": "Bachelor of Industrial Technology - Major in Electrical Technology", "code": "IndustrialTechnologyE" },
             { "name": "Bachelor of Industrial Technology - Major in Electronics and Communication Technology", "code": "IndustrialTechnologyECT" },
             { "name": "Bachelor of Industrial Technology - Major in Electronics Technology", "code": "IndustrialTechnologyET" },
             { "name": "Bachelor of Industrial Technology - Major in Food Processing Technology", "code": "IndustrialTechnologyFPT" },

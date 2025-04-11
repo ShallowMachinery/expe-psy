@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, runTransaction } from "firebase/firestore";
+import { doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { dotSpinner } from 'ldrs';
 
@@ -51,6 +51,7 @@ const RForm = () => {
       }
 
       const formCountRef = doc(db, "analytics", "formCount");
+      const notificationsRef = doc(db, "analytics", "notifications");
 
       await runTransaction(db, async (transaction) => {
         const formCountSnap = await getDoc(formCountRef);
@@ -77,7 +78,27 @@ const RForm = () => {
             [selectedForm.type]: formCounts[selectedForm.type] + 1
           });
           localStorage.setItem("assignedForm", selectedForm.id);
-          navigate(selectedForm.id);
+
+          const sessionId = `session_${Date.now()}`;
+          const platform = navigator.userAgentData?.platform || navigator.userAgent;
+          await setDoc(
+            notificationsRef,
+            {
+              [sessionId]: {
+                message: `Started answering ${selectedForm.type}`,
+                timestamp: new Date().toISOString(),
+                name: null,
+                browser: navigator.userAgent,
+                platform: platform
+              }
+            },
+            { merge: true }
+          );
+          navigate(selectedForm.id, {
+            state: {
+              sessionId: sessionId,
+            }
+          });
         } else {
           console.error("All forms have reached the limit of 32.");
           navigate("/");

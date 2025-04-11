@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import './form.css';
 import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, increment, getDoc, setDoc } from "../firebase";
 import Courses from "./courses";
+import { useLocation } from "react-router-dom";
 
 const questionData = [
   { questionId: 1, src: "/images/foreign1.jpg", correctAnswer: "Happiness" },
@@ -19,6 +20,8 @@ const questionData = [
 ];
 
 const T4Form = () => {
+  const location = useLocation();
+  const sessionId = location.state?.sessionId || null;
   const [haveSubmitted, setHaveSubmitted] = useState(false);
   const [isIncompleteSubmission, setIsIncompleteSubmission] = useState(false);
   const [step, setStep] = useState(1);
@@ -86,7 +89,7 @@ const T4Form = () => {
     });
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (step === 1) {
       if (
         !formData.name.trim() ||
@@ -106,6 +109,18 @@ const T4Form = () => {
       setFormData((prevData) => ({
         ...prevData,
       }));
+
+      if (sessionId) {
+        try {
+          const notificationsRef = doc(db, "analytics", "notifications");
+          await updateDoc(notificationsRef, {
+            [`${sessionId}.name`]: formData.name.trim()
+          });
+          console.log("Name successfully sent to Firestore.");
+        } catch (error) {
+          console.error("Error sending name to Firestore:", error);
+        }
+      }
 
     } else if (step > 1 && step <= questionData.length + 1) {
       if (!formData.responses[step - 2]?.response) {
@@ -149,6 +164,7 @@ const T4Form = () => {
   const markIncompleteSubmission = async () => {
     try {
       const respondentsRef = doc(db, "analytics", "respondents");
+      const notificationsRef = doc(db, "analytics", "notifications");
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
@@ -161,6 +177,23 @@ const T4Form = () => {
         currentRespondents[respondentId].status = "Incomplete submission";
         await setDoc(respondentsRef, { list: currentRespondents }, { merge: true });
       }
+
+      const notificationId = `submission_${Date.now()}`;
+      const platform = navigator.userAgentData?.platform || navigator.userAgent;
+      await setDoc(
+        notificationsRef,
+        {
+          [notificationId]: {
+            message: `Did not finish in time answering ${formData.treatmentlevel}`,
+            timestamp: new Date().toISOString(),
+            name: formData.name.trim(),
+            browser: navigator.userAgent,
+            platform: platform,
+            relatedId: sessionId,
+          }
+        },
+        { merge: true }
+      );
 
       localStorage.setItem("submitted", "incomplete");
       window.location.href = "/time-up";
@@ -186,6 +219,7 @@ const T4Form = () => {
 
     try {
       const respondentsRef = doc(db, "analytics", "respondents");
+      const notificationsRef = doc(db, "analytics", "notifications");
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
@@ -221,6 +255,23 @@ const T4Form = () => {
         };
 
         await setDoc(respondentsRef, { list: updatedRespondents }, { merge: true });
+
+        const notificationId = `submission_${Date.now()}`;
+        const platform = navigator.userAgentData?.platform || navigator.userAgent;
+        await setDoc(
+          notificationsRef,
+          {
+            [notificationId]: {
+              message: `Finished answering ${formData.treatmentlevel}`,
+              timestamp: new Date().toISOString(),
+              name: formData.name.trim(),
+              browser: navigator.userAgent,
+              platform: platform,
+              relatedId: sessionId,
+            }
+          },
+          { merge: true }
+        );
       }
 
       await addDoc(collection(db, "formResponses"), finalData);

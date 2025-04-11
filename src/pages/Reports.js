@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { act, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { FaClipboardList, FaSignOutAlt, FaUsers, FaChartPie } from "react-icons/fa";
+import { FaClipboardList, FaSignOutAlt, FaUsers, FaChartPie, FaList } from "react-icons/fa";
 import { dotSpinner } from 'ldrs';
 import "./reports.css";
 import Forms from "./reports/forms";
 import Respondents from "./reports/respondents";
 import Analytics from "./reports/analytics";
+import ActivityLog from "./reports/activitylog";
 
 dotSpinner.register();
 
@@ -33,6 +34,7 @@ const Reports = () => {
   const [formCounts, setFormCounts] = useState({ T1: 0, T2: 0, T3: 0, T4: 0 });
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [respondents, setRespondents] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -111,6 +113,18 @@ const Reports = () => {
             }
           });
           setRespondents(enrichedRespondents);
+
+          const logsDocRef = doc(db, "analytics", "notifications");
+          const logsDocSnap = await getDoc(logsDocRef);
+          
+          if (logsDocSnap.exists()) {
+            const data = logsDocSnap.data(); // This will be an object with sessionId keys
+            const logs = Object.entries(data).map(([id, value]) => ({
+              id,
+              ...value
+            }));
+            setActivityLogs(logs);
+          }         
         }
       } catch (error) {
         console.error("Error checking admin access:", error);
@@ -178,6 +192,7 @@ const Reports = () => {
         <Forms formCounts={formCounts} respondents={respondents} useScreenSize={useScreenSize} />
         <Respondents respondents={respondents} setRespondents={setRespondents} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} />
         <Analytics useScreenSize={useScreenSize} />
+        <ActivityLog useScreenSize={useScreenSize} activityLogs={activityLogs} />
       </div>
 
       <div className="bottom-navbar">
@@ -193,10 +208,15 @@ const Reports = () => {
           <FaChartPie />
           Responses
         </button>
+        <button onClick={() => scrollToSection("activity-log-card")}>
+          <FaList />
+          Log
+        </button>
         <button className="logout-btn-navbar" onClick={() => setShowLogoutModal(true)}>
           <FaSignOutAlt />
           Logout
         </button>
+
       </div>
       {showLogoutModal && (
         <div className="modal-overlay">

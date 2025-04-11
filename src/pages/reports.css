@@ -215,12 +215,13 @@
 .bottom-navbar button {
   background: none;
   border: none;
-  font-size: 14px;
+  font-size: 11px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   color: #333;
+  width: 20%;
 }
 
 .bottom-navbar .logout-btn-navbar {
@@ -629,6 +630,43 @@
 .respondents-table input[type="text"] {
   font-size: smaller;
 }
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notification-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f1f1f1;
+}
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.notif-message {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.notif-meta {
+  font-size: 0.8rem;
+  color: #666;
+}
+
 
 @media (max-width: 480px) {
   .open-respondent-details-btn {

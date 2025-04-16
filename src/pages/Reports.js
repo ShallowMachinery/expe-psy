@@ -103,12 +103,14 @@ const Reports = () => {
               );
               return {
                 ...respondent,
-                submittedAt: matchedResponse?.submittedAt || null
+                submittedAt: matchedResponse?.submittedAt || null,
+                responseId: matchedResponse?.id || null,
               };
             } else {
               return {
                 ...respondent,
-                submittedAt: null
+                submittedAt: null,
+                responseId: null,
               };
             }
           });

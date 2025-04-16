@@ -640,7 +640,7 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                 </tr>
                             ) : (
                                 <tr
-                                    title={resp.id}
+                                    title={resp.responseId ? resp.responseId : ""}
                                     key={resp.id || index}
                                     style={{
                                         color:

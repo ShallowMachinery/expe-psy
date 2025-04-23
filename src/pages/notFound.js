@@ -6,7 +6,7 @@ const NotFound = () => {
             <div className="not-found-overlay">
                 <div className="not-found-container">
                     <h1 style={{ textAlign: "center" }}>Sorry!</h1>
-                    <p>We cannot find the page you're looking for.</p>
+                    <p>This form is now closed. Thank you for your interest!</p>
                 </div>
             </div>
         </div>

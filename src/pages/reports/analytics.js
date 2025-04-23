@@ -35,6 +35,13 @@ const QUESTION_DATA_FOREIGN = [
     { questionId: 12, src: "/images/foreign12.jpg", correctAnswer: "Anger" },
 ]
 
+const treatmentToMeta = {
+  T1: { Language: "Free-labeling", Race: "Filipino" },
+  T2: { Language: "Free-labeling", Race: "Foreign" },
+  T3: { Language: "Discrete", Race: "Filipino" },
+  T4: { Language: "Discrete", Race: "Foreign" },
+};
+
 const Analytics = ({ useScreenSize }) => {
     const isMobile = useScreenSize();
 
@@ -111,8 +118,8 @@ const Analytics = ({ useScreenSize }) => {
 
             setResponsesData(responseMap);
             setRespondentCounts(counts);
-
             setExcelResponseData(excelData);
+            console.log("Excel Data:", excelData);
         };
 
         fetchResponses();
@@ -127,73 +134,84 @@ const Analytics = ({ useScreenSize }) => {
 
             let data = [];
 
-            let headerRow1 = ["Participant"];
-            let headerRow2 = [""];
+            let headerRow = ["Participant", "Language", "Race", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "F1 Score"];
 
-            for (let i = 0; i < QUESTION_COUNT; i++) {
-                headerRow1.push(`Item ${i + 1}`, "", "", "");
-                headerRow2.push("T1", "T2", "T3", "T4");
-            }
+            data.push(headerRow);
 
-            data.push(headerRow1);
-            data.push(headerRow2);
+            let rowIndex = 2;
 
-            for (let i = 1; i <= 32; i++) {
-                let participantId = `P${String(i).padStart(2, "0")}`;
-                let row = [participantId];
-
-                for (let q = 0; q < QUESTION_COUNT; q++) {
-                    for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
-                        const treatment = TREATMENT_LEVELS[t];
-                        let score = "";
-
-                        if (excelResponseData[treatment] &&
-                            excelResponseData[treatment][participantId] &&
-                            excelResponseData[treatment][participantId][q] !== undefined) {
-                            score = excelResponseData[treatment][participantId][q];
-                        }
-
-                        row.push(score);
-                    }
-                }
-
-                data.push(row);
-            }
-
-            let f1Row = ["F1 score"];
-            for (let q = 0; q < QUESTION_COUNT; q++) {
-                for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
-                    f1Row.push({ f: "" });
-                }
-            }
-            data.push(f1Row);
-
+            Object.entries(excelResponseData).forEach(([treatmentKey, participants]) => {
+                const meta = treatmentToMeta[treatmentKey];
+    
+                Object.entries(participants).forEach(([participantID, answers]) => {
+                    const row = [
+                        participantID,
+                        meta.Language,
+                        meta.Race,
+                        ...answers.map(val => typeof val === "number" ? val : parseFloat(val)),
+                    ];
+    
+                    const TP = answers.filter(val => val === 1 || parseFloat(val) === 1).length;
+                    const FP = answers.filter(val => val === 0.5 || parseFloat(val) === 0.5).length;
+                    const FN = answers.filter(val => val === 0 || parseFloat(val) === 0).length;
+                    
+                    const precision = TP / (TP + FP);
+                    const recall = TP / (TP + FN);
+                    
+                    const f1Score = 2 * (precision * recall) / (precision + recall);
+                    
+                    const roundedF1 = f1Score.toFixed(2);
+                    
+                    row.push(roundedF1 === "NaN" ? 0 : roundedF1);
+    
+                    data.push(row);
+                    console.log("Row Data:", row);
+                    rowIndex++;
+                });
+            });
+        
             const ws = XLSX.utils.aoa_to_sheet(data);
 
-            ws['!merges'] = [];
-            ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } });
-
-            for (let i = 0; i < QUESTION_COUNT; i++) {
-                ws['!merges'].push({ s: { r: 0, c: 1 + i * 4 }, e: { r: 0, c: 4 + i * 4 } });
-            }
-
-            const f1RowIndex = data.length - 1;
-            for (let q = 0; q < QUESTION_COUNT; q++) {
-                for (let t = 0; t < TREATMENT_LEVELS.length; t++) {
-                    const col = 1 + q * 4 + t;
-                    const colLetter = XLSX.utils.encode_col(col);
-                    const startRow = 2;
-                    const endRow = f1RowIndex - 1;
-
-                    const formula = `=(2 * ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0.5))))) * ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0)))))) / (((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0.5))))) + ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1)) / ((COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 1) + (COUNTIF(${colLetter}${startRow + 1}:${colLetter}${endRow + 1}, 0))))))`;
-
-                    ws[XLSX.utils.encode_cell({ r: f1RowIndex, c: col })] = { f: formula };
-                }
+            ws['!cols'] = [
+                {wch: 15}, // A - Participant
+                {wch: 15}, // B - Language
+                {wch: 15}, // C - Race
+                {wch: 8},  // D - Q1
+                {wch: 8},  // E - Q2
+                {wch: 8},  // F - Q3
+                {wch: 8},  // G - Q4
+                {wch: 8},  // H - Q5
+                {wch: 8},  // I - Q6
+                {wch: 8},  // J - Q7
+                {wch: 8},  // K - Q8
+                {wch: 8},  // L - Q9
+                {wch: 8},  // M - Q10
+                {wch: 8},  // N - Q11
+                {wch: 8},  // O - Q12
+                {wch: 10}  // P - F1 Score
+            ];
+            
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for(let row = range.s.r; row <= range.e.r; row++) {
+                const cellAddress = XLSX.utils.encode_cell({r: row, c: 15});
+                if(!ws[cellAddress]) continue;
+                
+                if(!ws[cellAddress].s) ws[cellAddress].s = {};
+                ws[cellAddress].z = '@';
+                ws[cellAddress].s.alignment = { horizontal: 'left' };
             }
 
             const wb = XLSX.utils.book_new();
+            const timestamp = new Date().toLocaleString("en-US", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+            }).replace(/[/:, ]/g, "-"); // sanitize for filename
+            
             XLSX.utils.book_append_sheet(wb, ws, "Survey Results");
-            XLSX.writeFile(wb, "Survey_Results.xlsx");
+            XLSX.writeFile(wb, `Survey_Results_${timestamp}.xlsx`);
         } catch (error) {
             console.error("Error exporting to Excel:", error);
             alert("Error exporting to Excel: " + error.message);
@@ -202,7 +220,7 @@ const Analytics = ({ useScreenSize }) => {
 
     const checkResponsesAndExport = () => {
         const insufficientLevels = Object.entries(respondentCounts)
-            .filter(([_, count]) => count < 45)
+            .filter(([_, count]) => count < 32)
             .map(([level]) => level);
     
         if (insufficientLevels.length === 0) {

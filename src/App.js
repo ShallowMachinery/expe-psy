@@ -63,6 +63,7 @@ function App() {
             isAuthenticated ? <Reports /> : <Navigate to="/" />
           }
         />
+        {/* Form closed
         <Route path="/XfN4pu0g3lSGXCbwqW4U" element={<T1Form />} />
         <Route path="/h9BVtFjY5EpI3s2Jj1eA" element={<T2Form />} />
         <Route path="/DNf1XbrdcE5vgxiEmv13" element={<T3Form />} />
@@ -70,6 +71,7 @@ function App() {
         <Route path="/time-up" element={<TimeUp />} />
         <Route path="/7q7fbmQylOjPCmnJzFO5" element={<RForm />} />
         <Route path="/already-submitted" element={haveSubmitted ? <alreadySubmitted /> : <NotFound />} />
+        */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

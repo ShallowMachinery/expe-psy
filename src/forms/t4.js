@@ -165,6 +165,7 @@ const T4Form = () => {
     try {
       const respondentsRef = doc(db, "analytics", "respondents");
       const notificationsRef = doc(db, "analytics", "notifications");
+      const formCountRef = doc(db, "analytics", "formCount");
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
@@ -220,6 +221,7 @@ const T4Form = () => {
     try {
       const respondentsRef = doc(db, "analytics", "respondents");
       const notificationsRef = doc(db, "analytics", "notifications");
+      const formCountRef = doc(db, "analytics", "formCount");
       const respondentsSnap = await getDoc(respondentsRef);
       const currentRespondents = respondentsSnap.exists() ? respondentsSnap.data().list || {} : {};
 
@@ -232,7 +234,6 @@ const T4Form = () => {
 
       if (respondentId) {
         if (currentRespondents[respondentId].status === "Submitted") {
-          localStorage.removeItem("assignedForm");
 
           const analyticsRef = doc(db, "analytics", "formCount");
           await updateDoc(analyticsRef, {
@@ -274,8 +275,11 @@ const T4Form = () => {
         );
       }
 
+      await updateDoc(formCountRef, {
+        [treatmentField]: increment(1),
+      });
+
       await addDoc(collection(db, "formResponses"), finalData);
-      localStorage.removeItem("assignedForm");
       localStorage.setItem("submitted", true);
 
     } catch (error) {

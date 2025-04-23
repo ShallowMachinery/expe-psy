@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
+import { doc, getDoc, orderBy, runTransaction, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { dotSpinner } from 'ldrs';
 
@@ -44,66 +44,90 @@ const RForm = () => {
   const fetchFormCountsAndNavigate = async () => {
     setLoading(true);
     try {
-      const assignedForm = localStorage.getItem("assignedForm");
-      if (assignedForm) {
-        navigate(assignedForm);
+      const respondentsRef = doc(db, "analytics", "respondents");
+      const respondentsSnap = await getDoc(respondentsRef);
+      const formCountRef = doc(db, "analytics", "formCount");
+      const formCountSnap = await getDoc(formCountRef);
+
+      if (!formCountSnap.exists()) {
+        throw new Error("Form count data does not exist in Firebase.");
+      }
+
+      const formCounts = formCountSnap.data();
+
+      let treatmentCounts = {};
+      if (respondentsSnap.exists()) {
+        const respondentsData = respondentsSnap.data().list || {};
+        const rawRespondents = Object.entries(respondentsData).map(([id, details]) => ({
+          id,
+          name: details.name,
+          course: details.course,
+          yearLevel: details.yearLevel,
+          section: details.section,
+          treatmentLevel: details.treatmentLevel,
+          status: details.status,
+        }));
+
+        treatmentCounts = rawRespondents.reduce((acc, respondent) => {
+          if (respondent.treatmentLevel) {
+            acc[respondent.treatmentLevel] = (acc[respondent.treatmentLevel] || 0) + 1;
+          }
+          return acc;
+        }, {});
+      }
+
+      const forms = [
+        { id: "/h9BVtFjY5EpI3s2Jj1eA", type: "T2", count: treatmentCounts.T2 || 0 },
+        { id: "/DNf1XbrdcE5vgxiEmv13", type: "T3", count: treatmentCounts.T3 || 0 },
+        { id: "/lcSkgVKARcdUIRUw25j9", type: "T4", count: treatmentCounts.T4 || 0 },
+      ].filter((form) => formCounts[form.type] < 32);
+  
+      if (forms.length === 0) {
+        console.error("No available forms to assign.");
+        navigate("/");
         return;
       }
 
-      const formCountRef = doc(db, "analytics", "formCount");
-      const notificationsRef = doc(db, "analytics", "notifications");
+      const lastAssignedRef = doc(db, "analytics", "lastAssignedForm");
+      const lastAssignedSnap = await getDoc(lastAssignedRef);
+      let lastAssignedType = lastAssignedSnap.exists() ? lastAssignedSnap.data().type : null;
+      
+      const formOrder = forms.map((form) => form.type);
+      const lastIndex = formOrder.indexOf(lastAssignedType);
+      const nextIndex = (lastIndex + 1) % formOrder.length;
+      const nextFormType = formOrder[nextIndex];
 
-      await runTransaction(db, async (transaction) => {
-        const formCountSnap = await getDoc(formCountRef);
+      const selectedForm = forms.find((form) => form.type === nextFormType);
 
-        if (!formCountSnap.exists()) {
-          throw new Error("Form count data does not exist in Firebase.");
-        }
-
-        const formCounts = formCountSnap.data();
-
-        const forms = [
-          { id: "/XfN4pu0g3lSGXCbwqW4U", type: "T1", count: formCounts.T1 },
-          { id: "/h9BVtFjY5EpI3s2Jj1eA", type: "T2", count: formCounts.T2 },
-          { id: "/DNf1XbrdcE5vgxiEmv13", type: "T3", count: formCounts.T3 },
-          { id: "/lcSkgVKARcdUIRUw25j9", type: "T4", count: formCounts.T4 }
-        ];
-
-        forms.sort((a, b) => a.count - b.count);
-        const availableForms = forms.filter(form => form.count < 32);
-
-        if (availableForms.length > 0) {
-          const selectedForm = availableForms[0];
-          transaction.update(formCountRef, {
-            [selectedForm.type]: formCounts[selectedForm.type] + 1
-          });
-          localStorage.setItem("assignedForm", selectedForm.id);
-
-          const sessionId = `session_${Date.now()}`;
-          const platform = navigator.userAgentData?.platform || navigator.userAgent;
-          await setDoc(
-            notificationsRef,
-            {
-              [sessionId]: {
-                message: `Started answering ${selectedForm.type}`,
-                timestamp: new Date().toISOString(),
-                name: null,
-                browser: navigator.userAgent,
-                platform: platform
-              }
+      if (selectedForm) {
+        await setDoc(lastAssignedRef, { type: nextFormType });
+        const sessionId = `session_${Date.now()}`;
+        const platform = navigator.userAgentData?.platform || navigator.userAgent;
+  
+        const notificationsRef = doc(db, "analytics", "notifications");
+        await setDoc(
+          notificationsRef,
+          {
+            [sessionId]: {
+              message: `Started answering ${selectedForm.type}`,
+              timestamp: new Date().toISOString(),
+              name: null,
+              browser: navigator.userAgent,
+              platform: platform,
             },
-            { merge: true }
-          );
-          navigate(selectedForm.id, {
-            state: {
-              sessionId: sessionId,
-            }
-          });
-        } else {
-          console.error("All forms have reached the limit of 32.");
-          navigate("/");
-        }
-      });
+          },
+          { merge: true }
+        );
+  
+        navigate(selectedForm.id, {
+          state: {
+            sessionId: sessionId,
+          },
+        });
+      } else {
+        console.error("No available forms to assign.");
+        navigate("/");
+      }
     } catch (error) {
       console.error("Error fetching form counts:", error);
       navigate("/");

@@ -17,7 +17,7 @@ const formatDateTime = (dateString) => {
     return date.toLocaleString(undefined, options);
 }
 
-const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenSize }) => {
+const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenSize, experimentDone }) => {
     const isMobile = useScreenSize();
 
     const [addRespondentButtonEnabled, setAddRespondentButtonEnabled] = useState(true);
@@ -393,9 +393,11 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                         <p><strong>Submitted:</strong> {statusCounts["Submitted"] || 0}</p>
                     </div>
                 </div>
-                <button className="add-respondents-btn" style={isMobile ? { width: "100%" } : {}} onClick={handleAddRespondent} disabled={!addRespondentButtonEnabled}>
-                    Add Respondent
-                </button>
+                {!experimentDone && (
+                    <button className="add-respondents-btn" style={isMobile ? { width: "100%" } : {}} onClick={handleAddRespondent} disabled={!addRespondentButtonEnabled}>
+                        Add Respondent
+                    </button>
+                )}
             </div>
 
             <table className="respondents-table">
@@ -652,22 +654,24 @@ const Respondents = ({ respondents, setRespondents, getTreatmentText, useScreenS
                                     <td>
                                         <span style={{ display: "flex", verticalAlign: "middle", justifyContent: "space-between", marginTop: "0px" }}>
                                             {resp.name}
-                                            <div className="actions-div not-editing">
-                                                <button
-                                                    className="edit-btn action-btn"
-                                                    onClick={() => handleEditRespondent(resp)}
-                                                    title="Edit respondent"
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    className="delete-btn action-btn"
-                                                    onClick={() => handleDeleteClick(resp)}
-                                                    title="Delete respondent"
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
+                                            {!experimentDone && (
+                                                <div className="actions-div not-editing">
+                                                    <button
+                                                        className="edit-btn action-btn"
+                                                        onClick={() => handleEditRespondent(resp)}
+                                                        title="Edit respondent"
+                                                    >
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button
+                                                        className="delete-btn action-btn"
+                                                        onClick={() => handleDeleteClick(resp)}
+                                                        title="Delete respondent"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </span>
                                     </td>
                                     <td>

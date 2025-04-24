@@ -77,6 +77,7 @@ const RForm = () => {
       }
 
       const forms = [
+        { id: "/XfN4pu0g3lSGXCbwqW4U", type: "T1", count: treatmentCounts.T1 || 0 },
         { id: "/h9BVtFjY5EpI3s2Jj1eA", type: "T2", count: treatmentCounts.T2 || 0 },
         { id: "/DNf1XbrdcE5vgxiEmv13", type: "T3", count: treatmentCounts.T3 || 0 },
         { id: "/lcSkgVKARcdUIRUw25j9", type: "T4", count: treatmentCounts.T4 || 0 },

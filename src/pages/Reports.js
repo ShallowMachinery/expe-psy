@@ -9,6 +9,7 @@ import Forms from "./reports/forms";
 import Respondents from "./reports/respondents";
 import Analytics from "./reports/analytics";
 import ActivityLog from "./reports/activitylog";
+import e from "cors";
 
 dotSpinner.register();
 
@@ -35,6 +36,14 @@ const Reports = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [respondents, setRespondents] = useState([]);
   const [activityLogs, setActivityLogs] = useState([]);
+  const [experimentDone, setExperimentDone] = useState(false);
+
+  useEffect(() => {
+    if (Date.now() > new Date("2025-04-24").getTime()) {
+      setExperimentDone(true);
+    }
+  }
+, []);
 
   useEffect(() => {
     const auth = getAuth();
@@ -191,8 +200,8 @@ const Reports = () => {
       </nav>
 
       <div className="reports-container">
-        <Forms formCounts={formCounts} respondents={respondents} useScreenSize={useScreenSize} />
-        <Respondents respondents={respondents} setRespondents={setRespondents} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} />
+        <Forms formCounts={formCounts} respondents={respondents} useScreenSize={useScreenSize} experimentDone={experimentDone} />
+        <Respondents respondents={respondents} setRespondents={setRespondents} getTreatmentText={getTreatmentText} useScreenSize={useScreenSize} experimentDone={experimentDone} />
         <Analytics useScreenSize={useScreenSize} />
         <ActivityLog useScreenSize={useScreenSize} activityLogs={activityLogs} />
       </div>

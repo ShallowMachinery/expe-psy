@@ -145,7 +145,7 @@ const Analytics = ({ useScreenSize }) => {
     
                 Object.entries(participants).forEach(([participantID, answers]) => {
                     const row = [
-                        participantID,
+                        `P${String(rowIndex - 1).padStart(3, "0")}`,
                         meta.Language,
                         meta.Race,
                         ...answers.map(val => typeof val === "number" ? val : parseFloat(val)),
@@ -192,13 +192,15 @@ const Analytics = ({ useScreenSize }) => {
             ];
             
             const range = XLSX.utils.decode_range(ws['!ref']);
-            for(let row = range.s.r; row <= range.e.r; row++) {
-                const cellAddress = XLSX.utils.encode_cell({r: row, c: 15});
-                if(!ws[cellAddress]) continue;
-                
-                if(!ws[cellAddress].s) ws[cellAddress].s = {};
-                ws[cellAddress].z = '@';
-                ws[cellAddress].s.alignment = { horizontal: 'left' };
+            for (let row = range.s.r; row <= range.e.r; row++) {
+                for (let col = range.s.c; col <= range.e.c; col++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                    if (!ws[cellAddress]) continue;
+            
+                    if (!ws[cellAddress].s) ws[cellAddress].s = {};
+                    ws[cellAddress].z = '@';
+                    ws[cellAddress].s.alignment = { horizontal: 'left' };
+                }
             }
 
             const wb = XLSX.utils.book_new();

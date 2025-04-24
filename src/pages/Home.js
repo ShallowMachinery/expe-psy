@@ -4,8 +4,7 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import "./home.css";
 
-const Home = () => {
-
+const Home = ({ experimentDone }) => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
@@ -63,6 +62,7 @@ const Home = () => {
                     <h1>Examining the Interaction Effect of Language and Racial Categorization on Emotion Perception</h1>
                 </div>
 
+                {experimentDone && <p className="experiment-done-message">The experiment is already finished.</p>}
                 {error && <p className="error-message">{error}</p>}
 
                 <form onSubmit={handleLogin}>

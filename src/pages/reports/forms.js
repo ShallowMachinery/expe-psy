@@ -1,30 +1,13 @@
 import React, { useState } from "react";
-import { FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaExclamationTriangle, FaRedo, FaRegHandPointRight } from "react-icons/fa";
+import { FaCheck, FaChevronDown, FaChevronUp, FaClipboard, FaClipboardCheck, FaExclamationTriangle, FaRedo, FaRegHandPointRight } from "react-icons/fa";
 import Response from "./response";
 
-const schedule = (date) => {
-    const inputDate = new Date(date);
-
-    if (inputDate >= new Date("2025-04-07T02:00:00Z") && inputDate <= new Date("2025-04-07T02:30:00Z")) {
-        return "Monday (April 7), 10:00 AM - 10:30 AM";
-    } else if (inputDate >= new Date("2025-04-07T07:00:00Z") && inputDate <= new Date("2025-04-07T07:30:00Z")) {
-        return "Monday (April 7), 3:00 PM - 3:30 PM";
-    } else if (inputDate >= new Date("2025-04-09T02:00:00Z") && inputDate <= new Date("2025-04-09T02:30:00Z")) {
-        return "Wednesday (April 9), 10:00 AM - 10:30 AM";
-    } else if (inputDate >= new Date("2025-04-09T04:00:00Z") && inputDate <= new Date("2025-04-09T04:30:00Z")) {
-        return "Wednesday (April 9), 12:00 PM - 12:30 PM";
-    } else if (inputDate >= new Date("2025-04-09T07:00:00Z") && inputDate <= new Date("2025-04-09T08:30:00Z")) {
-        return "Wednesday (April 9), 3:00 PM - 3:30 PM";
-    } else if (inputDate >= new Date("2025-04-10T02:00:00Z") && inputDate <= new Date("2025-04-10T02:30:00Z")) {
-        return "Thursday (April 10), 10:00 AM - 10:30 AM";
-    } else if (inputDate >= new Date("2025-04-12T02:00:00Z") && inputDate <= new Date("2025-04-12T02:30:00Z")) {
-        return "Saturday (April 12), 10:00 AM - 10:30 AM";
-    } else if (inputDate >= new Date("2025-04-12T07:00:00Z") && inputDate <= new Date("2025-04-12T07:30:00Z")) {
-        return "Saturday (April 12), 3:00 PM - 3:30 PM";
-    }
+const formatDate = (date) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+    return new Date(date).toLocaleString('en-US', options);
 }
 
-const Forms = ({ formCounts, respondents, useScreenSize }) => {
+const Forms = ({ formCounts, respondents, useScreenSize, experimentDone }) => {
     const isMobile = useScreenSize();
     const [expandedRows, setExpandedRows] = useState({});
     const [copiedLink, setCopiedLink] = useState(null);
@@ -121,8 +104,9 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
     return (
         <div className="card" id="forms-card">
             <h2 className="card-title">Forms</h2>
-            <button onClick={(e) => { e.stopPropagation(); handleCopyRandomLink(); }} style={isMobile ? { width: "100%" } : {}} className="get-random-form-link-btn">
-                {copiedRandomLink ? (
+            <button onClick={(e) => { e.stopPropagation(); handleCopyRandomLink(); }} style={isMobile ? { width: "100%" } : {}} className="get-random-form-link-btn" disabled={experimentDone}>
+                {!experimentDone ? 
+                (copiedRandomLink ? (
                     <>
                         <FaClipboardCheck /> Copied!
                     </>
@@ -130,7 +114,12 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                     <>
                         <FaClipboard /> Get and copy randomized form link
                     </>
-                )}</button>
+                )) : (
+                    <>
+                        <FaCheck /> Experiment is done!
+                    </>
+                )}
+                </button>
             <table className="forms-table">
                 <thead>
                     <tr>
@@ -153,6 +142,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                 <td>{description}</td>
                                 <td title={treatmentCounts[key] !== formCounts[key] ? "Form counts are not matching in the database, please report this to us." : ""}><div style={{ display: "flex", justifyContent: "space-between", verticalAlign: "middle", alignItems: "center" }}>{treatmentCounts[key] || 0} / 32 {treatmentCounts[key] !== formCounts[key] ? <FaExclamationTriangle style={{ color: "red" }}/> : ""}</div></td>
                                 <td>
+                                    {!experimentDone ?
                                     <span style={{ marginTop: "0px", gap: "5px", display: "flex", justifyContent: "space-between", alignItems: "center", verticalAlign: "middle" }}>
                                         {isMobile
                                             ? <button
@@ -189,6 +179,8 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                             )}
                                         </button>
                                     </span>
+                                    :
+                                    <span style={{ marginTop: "0px", gap: "5px", display: "flex", justifyContent: "space-between", alignItems: "center", verticalAlign: "middle" }}>Experiment is done!</span>}
                                 </td>
                             </tr>
 
@@ -202,7 +194,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                                     <thead>
                                                         <tr>
                                                             <th>Name</th>
-                                                            <th>Assigned Schedule</th>
+                                                            <th>Submitted</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -212,7 +204,7 @@ const Forms = ({ formCounts, respondents, useScreenSize }) => {
                                                             .map((r, index) => (
                                                                 <tr key={r.name + index}>
                                                                     <td onClick={() => { handleOpenModal(r) }} style={{ cursor: "pointer" }}>{r.name}</td>
-                                                                    <td>{schedule(r.submittedAt)}</td>
+                                                                    <td>{formatDate(r.submittedAt)}</td>
                                                                 </tr>
                                                             ))}
                                                     </tbody>
